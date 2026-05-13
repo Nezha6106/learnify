@@ -1,0 +1,98 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Performance report | Learnify</title>
+    <link rel="stylesheet" href="{% static 'courses/styles.css' %}">
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="{% url 'home' %}" aria-label="Learnify home">
+            <span class="brand-mark">L</span>
+            <span>Learnify</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+            <a href="{% url 'home' %}#courses">Courses</a>
+            <a href="{% url 'admin_access' %}">Admin</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <span class="nav-user">{{ user.username }}</span>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="nav-button" type="submit">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Sign in</a>
+                <a class="nav-cta" href="{% url 'signup' %}">Create account</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        <section class="report-layout">
+            <div class="report-header">
+                <p class="eyebrow">Student analytics</p>
+                <h1>Performance report</h1>
+                <p class="hero-text">Generate a progress and marks report from quiz attempts using the student's email.</p>
+            </div>
+
+            <form method="get" class="report-form">
+                {{ form.email.label_tag }}
+                {{ form.email }}
+                {{ form.email.errors }}
+                <button class="button primary" type="submit">Create report</button>
+            </form>
+
+            {% if summary %}
+                <section class="report-summary" aria-label="Report summary">
+                    <div>
+                        <span>{{ summary.email }}</span>
+                        <small>Student</small>
+                    </div>
+                    <div>
+                        <span>{{ summary.attempts }}</span>
+                        <small>Attempts</small>
+                    </div>
+                    <div>
+                        <span>{{ summary.score }}/{{ summary.total }}</span>
+                        <small>Total marks</small>
+                    </div>
+                    <div>
+                        <span>{{ summary.percentage }}%</span>
+                        <small>Progress</small>
+                    </div>
+                </section>
+
+                <div class="score-card wide">
+                    <strong>{{ summary.percentage }}%</strong>
+                    <span>Overall quiz progress</span>
+                    <div class="meter" aria-label="Overall progress {{ summary.percentage }} percent">
+                        <span style="width: {{ summary.percentage }}%"></span>
+                    </div>
+                </div>
+
+                <section class="attempt-table" aria-label="Quiz attempt details">
+                    <div class="attempt-row table-head">
+                        <span>Course</span>
+                        <span>Marks</span>
+                        <span>Progress</span>
+                        <span>Submitted</span>
+                    </div>
+                    {% for attempt in attempts %}
+                        <div class="attempt-row">
+                            <span>{{ attempt.course.title }}</span>
+                            <span>{{ attempt.score }}/{{ attempt.total_questions }}</span>
+                            <span>{{ attempt.percentage }}%</span>
+                            <span>{{ attempt.submitted_at|date:"M d, Y H:i" }}</span>
+                        </div>
+                    {% empty %}
+                        <p class="empty-state">No quiz attempts found for this student yet.</p>
+                    {% endfor %}
+                </section>
+            {% endif %}
+        </section>
+    </main>
+</body>
+</html>

@@ -1,0 +1,290 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Learnify | Cyberpunk LMS{% endblock %}
+{% block meta_description %}Learnify is a cyberpunk learning command center for courses, live Zoom classes, progress telemetry, and reports.{% endblock %}
+
+{% block content %}
+<section class="page-shell">
+    <div class="cyber-hero">
+        <article class="cyber-panel hero-panel">
+            <p class="terminal-line">// learnify.network</p>
+            <h1>
+                Initialize your <span class="neon-text">learning runtime</span>.
+            </h1>
+            <p class="hero-text">
+                Access project-driven courses, live mentor sessions, quiz telemetry, and performance reports through a single secure LMS console.
+            </p>
+
+            <div class="typing-container">
+                <span id="typewriter-text"></span><span class="typing-cursor">&#9608;</span>
+            </div>
+
+            <div class="hero-actions">
+                <a href="#courses" class="button primary"><span>Browse Courses</span></a>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'dashboard' %}" class="button secondary">Open Dashboard</a>
+                {% else %}
+                    <a href="{% url 'signup' %}" class="button secondary">Create Account</a>
+                {% endif %}
+            </div>
+        </article>
+
+        <aside class="stats-grid" aria-label="Platform telemetry">
+            <div class="stat-card">
+                <span>Active Courses</span>
+                <strong>{{ stats.courses|default:"0" }}</strong>
+            </div>
+            <div class="stat-card">
+                <span>Live Sessions</span>
+                <strong>{{ stats.sessions|default:"0" }}</strong>
+            </div>
+            <div class="stat-card">
+                <span>Operators</span>
+                <strong>{{ stats.learners|default:"0" }}</strong>
+            </div>
+        </aside>
+    </div>
+
+    <section class="section-band" id="live" aria-labelledby="live-heading">
+        <div class="section-heading compact-heading">
+            <div>
+                <p class="eyebrow">// zoom.classroom</p>
+                <h2 id="live-heading">Upcoming live classes</h2>
+            </div>
+            {% if user.is_authenticated %}
+                <a class="button secondary" href="{% url 'dashboard' %}">Open Dashboard</a>
+            {% else %}
+                <a class="button secondary" href="{% url 'signup' %}">Join Learnify</a>
+            {% endif %}
+        </div>
+
+        <div class="lms-grid">
+            {% for session in upcoming_sessions %}
+                <article class="session-card">
+                    <span>{{ session.starts_at|date:"M d, H:i" }}</span>
+                    <h3>{{ session.title }}</h3>
+                    <p>{{ session.course.title }} with {{ session.host_name }}</p>
+                    <a class="card-action" href="{{ session.zoom_url }}" target="_blank" rel="noopener">Join Zoom</a>
+                </article>
+            {% empty %}
+                <p class="empty-state">&gt; Live Zoom classes will appear after they are added in admin.</p>
+            {% endfor %}
+        </div>
+    </section>
+
+    <section class="section-band" id="courses" aria-labelledby="courses-heading">
+        <div class="section-heading">
+            <div>
+                <p class="eyebrow">// course.library</p>
+                <h2 id="courses-heading">Choose your next skill</h2>
+            </div>
+        </div>
+
+        <section class="form-panel" aria-label="Course search and filters">
+            <form method="get" class="search-form terminal-form">
+                <div class="search-row">
+                    <label for="{{ search_form.query.id_for_label }}">
+                        Search
+                        {{ search_form.query }}
+                    </label>
+                    <button type="submit" class="button primary">Search</button>
+                </div>
+
+                <div class="filter-row">
+                    <label for="{{ search_form.category.id_for_label }}">
+                        Category
+                        {{ search_form.category }}
+                    </label>
+                    <label for="{{ search_form.level.id_for_label }}">
+                        Level
+                        {{ search_form.level }}
+                    </label>
+                    <label>
+                        Price range
+                        <span class="price-filters">
+                            {{ search_form.price_min }}
+                            <span>-</span>
+                            {{ search_form.price_max }}
+                        </span>
+                    </label>
+                    <button type="submit" class="button secondary">Apply</button>
+                    <a href="{% url 'home' %}#courses" class="button secondary">Clear</a>
+                </div>
+            </form>
+        </section>
+
+        <div class="course-grid section-band" id="courseGrid">
+            {% for course in courses %}
+                <article class="course-card" data-category="{{ course.category }}" data-search="{{ course.title }} {{ course.level }} {{ course.category }} {{ course.summary }}">
+                    <div class="course-meta">
+                        <span>{{ course.category }}</span>
+                        <span>{{ course.duration }}</span>
+                    </div>
+                    <h3>{{ course.title }}</h3>
+                    <p>{{ course.summary }}</p>
+                    <div class="course-footer">
+                        <span>{{ course.level }}</span>
+                        <a class="card-action" href="{{ course.get_absolute_url }}">View Course</a>
+                    </div>
+                </article>
+            {% empty %}
+                <p class="empty-state">&gt; No published courses yet. Add courses in Django admin.</p>
+            {% endfor %}
+        </div>
+        <p class="empty-state" id="emptyState" hidden>&gt; No matching courses found.</p>
+    </section>
+</section>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Responsive adjustments for home page */
+    @media (max-width: 768px) {
+        .cyber-hero {
+            flex-direction: column;
+            text-align: center;
+            gap: 2rem;
+        }
+        
+        .hero-panel {
+            padding: 1.5rem;
+        }
+        
+        h1 {
+            font-size: 1.8rem;
+        }
+        
+        .hero-text {
+            font-size: 1rem;
+            line-height: 1.5;
+        }
+        
+        .hero-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        
+        .hero-actions .button {
+            margin: 0.5rem 0;
+            padding: 0.75rem;
+            text-align: center;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .stat-card {
+            text-align: center;
+        }
+        
+        .lms-grid, .course-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .session-card, .course-card {
+            padding: 1.5rem;
+        }
+        
+        .search-form, .filter-row {
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .search-row, .filter-row {
+            width: 100%;
+        }
+        
+        .price-filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .price-filters span {
+            flex: 1;
+            min-width: 80px;
+        }
+        
+        .button {
+            width: 100%;
+            text-align: center;
+            padding: 0.75rem;
+        }
+        
+        .section-heading {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 0.5rem;
+        }
+        
+        .eyebrow {
+            margin-bottom: 0.25rem;
+        }
+        
+        h2 {
+            font-size: 1.5rem;
+        }
+    }
+    
+    /* Extra small devices */
+    @media (max-width: 480px) {
+        h1 {
+            font-size: 1.5rem;
+        }
+        
+        h2 {
+            font-size: 1.25rem;
+        }
+        
+        .hero-panel {
+            padding: 1rem;
+        }
+        
+        .stats-grid {
+            gap: 0.5rem;
+        }
+        
+        .stat-card strong {
+            font-size: 1.5rem;
+            display: block;
+        }
+        
+        .stat-card span {
+            font-size: 0.9rem;
+        }
+        
+        .session-card, .course-card {
+            padding: 1rem;
+        }
+        
+        .course-meta {
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .course-meta span {
+            flex: 1 1 100%;
+            text-align: center;
+        }
+        
+        .course-footer {
+            flex-direction: column;
+            gap: 0.5rem;
+            text-align: center;
+        }
+        
+        .card-action {
+            width: 100%;
+            text-align: center;
+            padding: 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'courses/app.js' %}?v=4"></script>
+{% endblock %}

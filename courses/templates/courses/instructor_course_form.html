@@ -1,0 +1,445 @@
+{% extends "courses/instructor_base.html" %}
+
+{% block title %}{{ action }} Course{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --void: #050505;
+        --glass: rgba(10, 15, 12, 0.45);
+        --glass-strong: rgba(6, 12, 9, 0.72);
+        --green: #00FF41;
+        --cyan: #00FFFF;
+        --purple: #a855f7;
+        --red: #ff3860;
+        --text: #e7fff0;
+        --muted: #6f7f78;
+        --line: rgba(0, 255, 65, 0.15);
+        --mono: "Fira Code", "Space Mono", "Consolas", monospace;
+    }
+
+    body {
+        background:
+            radial-gradient(circle at 18% 10%, rgba(0, 255, 65, 0.12), transparent 28%),
+            radial-gradient(circle at 90% 78%, rgba(0, 255, 255, 0.08), transparent 32%),
+            var(--void) !important;
+        color: var(--text);
+        font-family: var(--mono);
+    }
+
+    .main-content {
+        background: transparent;
+        font-family: var(--mono);
+    }
+
+    .cyber-topbar,
+    .cyber-panel,
+    .cyber-actions {
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .cyber-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 24px;
+        padding: 22px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .cyber-topbar::before,
+    .cyber-panel::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.14), transparent) top / 100% 1px no-repeat;
+        pointer-events: none;
+    }
+
+    .cyber-kicker {
+        color: var(--cyan);
+        font-size: 0.74rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .cyber-topbar h1 {
+        margin: 5px 0 6px;
+        color: var(--green);
+        font-family: var(--mono);
+        font-size: clamp(1.6rem, 4vw, 2.7rem);
+        text-shadow: 0 0 18px rgba(0, 255, 65, 0.34);
+    }
+
+    .topbar-breadcrumb,
+    .topbar-breadcrumb a {
+        color: var(--muted) !important;
+        font-family: var(--mono);
+        font-size: 0.82rem;
+    }
+
+    .cyber-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(320px, 0.38fr);
+        gap: 22px;
+        align-items: start;
+    }
+
+    .cyber-stack {
+        display: grid;
+        gap: 22px;
+    }
+
+    .cyber-panel {
+        position: relative;
+        padding: 22px;
+        overflow: hidden;
+    }
+
+    .cyber-panel h3 {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin: 0 0 20px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(0, 255, 65, 0.12);
+        color: var(--green);
+        font-family: var(--mono);
+        font-size: 0.95rem;
+        text-transform: uppercase;
+    }
+
+    .cyber-panel h3 span {
+        color: var(--cyan);
+        font-size: 0.72rem;
+    }
+
+    .field-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .terminal-field {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 16px;
+        color: var(--muted);
+        font-size: 0.76rem;
+        font-weight: 800;
+        text-transform: uppercase;
+    }
+
+    .terminal-field.full {
+        grid-column: 1 / -1;
+    }
+
+    .terminal-control {
+        position: relative;
+    }
+
+    .terminal-control::before {
+        content: ">";
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        z-index: 2;
+        transform: translateY(-50%);
+        color: var(--green);
+        pointer-events: none;
+    }
+
+    .terminal-control.textarea::before {
+        top: 17px;
+        transform: none;
+    }
+
+    .cyber-course-form input,
+    .cyber-course-form select,
+    .cyber-course-form textarea {
+        width: 100%;
+        min-height: 46px;
+        border: 1px solid rgba(0, 255, 65, 0.22);
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.38) !important;
+        color: var(--text) !important;
+        caret-color: var(--cyan);
+        font-family: var(--mono);
+        padding: 11px 13px 11px 32px;
+        outline: none;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+    }
+
+    .cyber-course-form textarea {
+        min-height: 132px;
+        resize: vertical;
+    }
+
+    .cyber-course-form input:focus,
+    .cyber-course-form select:focus,
+    .cyber-course-form textarea:focus {
+        border-color: var(--cyan);
+        background: rgba(0, 255, 255, 0.045) !important;
+        box-shadow: 0 0 0 1px rgba(0, 255, 255, 0.18), 0 0 24px rgba(0, 255, 255, 0.16);
+    }
+
+    .cyber-course-form input[type="checkbox"] {
+        width: 22px;
+        min-height: 22px;
+        accent-color: var(--green);
+        box-shadow: 0 0 14px rgba(0, 255, 65, 0.18);
+    }
+
+    .terminal-help,
+    .form-text {
+        margin-top: 6px;
+        color: var(--muted) !important;
+        font-size: 0.74rem;
+        text-transform: none;
+    }
+
+    .terminal-error {
+        margin-top: 7px;
+        color: var(--red);
+        font-size: 0.75rem;
+        text-shadow: 0 0 8px rgba(255, 56, 96, 0.28);
+    }
+
+    .thumbnail-preview {
+        overflow: hidden;
+        margin-bottom: 12px;
+        border: 1px solid rgba(0, 255, 255, 0.2);
+        border-radius: 8px;
+        background: rgba(0, 255, 255, 0.04);
+    }
+
+    .thumbnail-preview img {
+        width: 100%;
+        max-height: 170px;
+        object-fit: cover;
+        display: block;
+        filter: saturate(1.15) contrast(1.05);
+    }
+
+    .publish-toggle {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px;
+        border: 1px solid rgba(0, 255, 65, 0.16);
+        border-radius: 6px;
+        background: rgba(0, 255, 65, 0.045);
+    }
+
+    .cyber-actions {
+        display: grid;
+        gap: 12px;
+        padding: 16px;
+    }
+
+    .cyber-btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 46px;
+        border: 1px solid rgba(0, 255, 65, 0.24);
+        border-radius: 6px;
+        background: linear-gradient(90deg, var(--green), #32ff73);
+        color: #050505 !important;
+        font-family: var(--mono);
+        font-weight: 900;
+        text-decoration: none;
+        overflow: hidden;
+        box-shadow: 0 0 22px rgba(0, 255, 65, 0.24);
+    }
+
+    .cyber-btn.secondary {
+        background: rgba(0, 255, 255, 0.05);
+        color: var(--cyan) !important;
+        border-color: rgba(0, 255, 255, 0.26);
+        box-shadow: none;
+    }
+
+    .cyber-btn:hover {
+        animation: cyber-glitch 0.42s steps(2, end) infinite;
+        text-shadow: -2px 0 var(--cyan), 2px 0 var(--red);
+    }
+
+    @keyframes cyber-glitch {
+        0%, 100% { transform: translate(0); }
+        35% { transform: translate(-1px, 1px); }
+        70% { transform: translate(1px, -1px); }
+    }
+
+    @media (max-width: 1100px) {
+        .cyber-grid,
+        .field-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .cyber-topbar {
+            align-items: stretch;
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cyber-topbar">
+    <div>
+        <div class="cyber-kicker">COURSE_CONSTRUCT_PROTOCOL</div>
+        <h1>{{ action }} Course</h1>
+        <div class="topbar-breadcrumb">
+            Home / <a href="{% url 'instructor_course_list' %}" class="text-decoration-none">Courses</a> / {{ action }}
+        </div>
+    </div>
+    <a href="{% url 'instructor_course_list' %}" class="cyber-btn secondary">
+        BACKTRACE_LIST
+    </a>
+</div>
+
+<form method="post" enctype="multipart/form-data" action="{{ action_url }}" class="cyber-course-form">
+    {% csrf_token %}
+
+    <div class="cyber-grid">
+        <div class="cyber-stack">
+            <section class="cyber-panel">
+                <h3><span>NODE_01</span> Basic Information</h3>
+
+                <div class="field-grid">
+                    <label class="terminal-field full" for="{{ form.title.id_for_label }}">
+                        Course Title *
+                        <span class="terminal-control">{{ form.title }}</span>
+                        {% if form.title.errors %}
+                            <span class="terminal-error">{{ form.title.errors.0 }}</span>
+                        {% endif %}
+                    </label>
+
+                    <label class="terminal-field full" for="{{ form.slug.id_for_label }}">
+                        URL Slug
+                        <span class="terminal-control">{{ form.slug }}</span>
+                        <span class="terminal-help">{{ form.slug.help_text }}</span>
+                        {% if form.slug.errors %}
+                            <span class="terminal-error">{{ form.slug.errors.0 }}</span>
+                        {% endif %}
+                    </label>
+
+                    <label class="terminal-field" for="{{ form.category.id_for_label }}">
+                        Category *
+                        <span class="terminal-control">{{ form.category }}</span>
+                        {% if form.category.errors %}
+                            <span class="terminal-error">{{ form.category.errors.0 }}</span>
+                        {% endif %}
+                    </label>
+
+                    <label class="terminal-field" for="{{ form.level.id_for_label }}">
+                        Level *
+                        <span class="terminal-control">{{ form.level }}</span>
+                        {% if form.level.errors %}
+                            <span class="terminal-error">{{ form.level.errors.0 }}</span>
+                        {% endif %}
+                    </label>
+
+                    <label class="terminal-field full" for="{{ form.duration.id_for_label }}">
+                        Duration
+                        <span class="terminal-control">{{ form.duration }}</span>
+                        {% if form.duration.errors %}
+                            <span class="terminal-error">{{ form.duration.errors.0 }}</span>
+                        {% endif %}
+                    </label>
+                </div>
+            </section>
+
+            <section class="cyber-panel">
+                <h3><span>NODE_02</span> Mission Content</h3>
+
+                <label class="terminal-field" for="{{ form.summary.id_for_label }}">
+                    Summary
+                    <span class="terminal-control textarea">{{ form.summary }}</span>
+                    <span class="terminal-help">{{ form.summary.help_text }}</span>
+                    {% if form.summary.errors %}
+                        <span class="terminal-error">{{ form.summary.errors.0 }}</span>
+                    {% endif %}
+                </label>
+
+                <label class="terminal-field" for="{{ form.description.id_for_label }}">
+                    Full Description
+                    <span class="terminal-control textarea">{{ form.description }}</span>
+                    {% if form.description.errors %}
+                        <span class="terminal-error">{{ form.description.errors.0 }}</span>
+                    {% endif %}
+                </label>
+            </section>
+        </div>
+
+        <aside class="cyber-stack">
+            <section class="cyber-panel">
+                <h3><span>NODE_03</span> Deployment Settings</h3>
+
+                <label class="terminal-field" for="{{ form.price.id_for_label }}">
+                    Price (USD)
+                    <span class="terminal-control">{{ form.price }}</span>
+                    <span class="terminal-help">Set to 0.00 for a free course.</span>
+                    {% if form.price.errors %}
+                        <span class="terminal-error">{{ form.price.errors.0 }}</span>
+                    {% endif %}
+                </label>
+
+                <label class="terminal-field" for="{{ form.instructor.id_for_label }}">
+                    Instructor
+                    <span class="terminal-control">{{ form.instructor }}</span>
+                    <span class="terminal-help">Leave blank to assign yourself.</span>
+                    {% if form.instructor.errors %}
+                        <span class="terminal-error">{{ form.instructor.errors.0 }}</span>
+                    {% endif %}
+                </label>
+
+                <label class="terminal-field" for="{{ form.image.id_for_label }}">
+                    Thumbnail Image
+                    {% if course and course.image %}
+                        <span class="thumbnail-preview">
+                            <img src="{{ course.image.url }}" alt="Current thumbnail">
+                        </span>
+                        <span class="terminal-help">Current thumbnail. Upload a new one to replace it.</span>
+                    {% endif %}
+                    <span class="terminal-control">{{ form.image }}</span>
+                    <span class="terminal-help">{{ form.image.help_text }}</span>
+                    {% if form.image.errors %}
+                        <span class="terminal-error">{{ form.image.errors.0 }}</span>
+                    {% endif %}
+                </label>
+
+                <div class="publish-toggle">
+                    {{ form.is_published }}
+                    <label for="{{ form.is_published.id_for_label }}" class="mb-0">
+                        Publish this course
+                        <span class="terminal-help d-block">Uncheck to save as a draft.</span>
+                    </label>
+                </div>
+                {% if form.is_published.errors %}
+                    <div class="terminal-error">{{ form.is_published.errors.0 }}</div>
+                {% endif %}
+            </section>
+
+            <div class="cyber-actions">
+                <button type="submit" class="cyber-btn">
+                    {% if action == 'Create' %}EXECUTE_CREATE{% else %}COMMIT_PATCH{% endif %}
+                </button>
+                <a href="{% url 'instructor_course_list' %}" class="cyber-btn secondary">ABORT_SEQUENCE</a>
+            </div>
+        </aside>
+    </div>
+</form>
+{% endblock %}

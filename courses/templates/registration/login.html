@@ -1,0 +1,75 @@
+{% extends "registration/auth_base.html" %}
+
+{% block title %}Login | Learnify LMS{% endblock %}
+
+{% block auth_header %}
+    <h1>INITIALIZE_SESSION</h1>
+    <p>// Enter credentials to access secure terminal</p>
+    <div class="auth-terminal-panel" aria-label="Session telemetry">
+        <div>
+            <span>NODE_STATUS</span>
+            <strong>LISTENING</strong>
+        </div>
+        <div>
+            <span>CIPHER</span>
+            <strong>AES_256</strong>
+        </div>
+        <div>
+            <span>CHANNEL</span>
+            <strong>SECURE</strong>
+        </div>
+    </div>
+{% endblock %}
+
+{% block auth_content %}
+    {% if form.errors %}
+        <div class="auth-alert-box">
+            <span>[NEON_RED_ALERT]</span>
+            <strong>AUTH_FAILURE</strong>
+            <p>Access denied. Credentials failed verification.</p>
+        </div>
+    {% endif %}
+
+    <form method="post" class="auth-form" autocomplete="on" aria-label="Operator login terminal">
+        {% csrf_token %}
+        {% if next %}
+            <input type="hidden" name="next" value="{{ next }}">
+        {% endif %}
+
+        <section class="auth-form-group" aria-labelledby="login-identifier-label">
+            <label id="login-identifier-label" for="id_username">IDENTIFIER</label>
+            <div class="terminal-field">
+                <input type="text" name="username" id="id_username"
+                       class="terminal-input"
+                       value="{{ form.username.value|default_if_none:'' }}"
+                       placeholder="USER_ID_OR_EMAIL" required autofocus
+                       autocomplete="username"
+                       inputmode="email"
+                       aria-invalid="{% if form.username.errors or form.non_field_errors %}true{% else %}false{% endif %}">
+                <span class="auth-input-cursor" aria-hidden="true">&#9608;</span>
+            </div>
+        </section>
+
+        <section class="auth-form-group" aria-labelledby="login-password-label">
+            <label id="login-password-label" for="id_password">ACCESS_KEY</label>
+            <div class="terminal-field">
+                <input type="password" name="password" id="id_password"
+                       class="terminal-input"
+                       placeholder="SECURE_ACCESS_KEY" required
+                       autocomplete="current-password"
+                       aria-invalid="{% if form.password.errors or form.non_field_errors %}true{% else %}false{% endif %}">
+                <span class="auth-input-cursor" aria-hidden="true">&#9608;</span>
+            </div>
+        </section>
+
+        <button type="submit" class="button primary auth-submit-btn" data-glitch="INITIALIZE CONNECTION">
+            <span>INITIALIZE CONNECTION</span>
+        </button>
+    </form>
+{% endblock %}
+
+{% block auth_footer %}
+    New operator? <a href="{% url 'signup' %}">CREATE_ACCOUNT</a>
+    <span class="auth-footer-separator">/</span>
+    <a href="{% url 'password_reset' %}">RESET_KEY</a>
+{% endblock %}

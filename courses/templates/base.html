@@ -1,0 +1,588 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{% block meta_description %}Learnify LMS command center for courses, live classes, progress tracking, and reports.{% endblock %}">
+    <title>{% block title %}Learnify LMS{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'courses/base.css' %}?v=1">
+    {% block extra_css %}{% endblock %}
+    {% block extra_head %}{% endblock %}
+    <style>
+        :root {
+            --bg-dark: #050505;
+            --bg-panel: rgba(10, 15, 12, 0.45);
+            --border-glass: 1px solid rgba(0, 255, 65, 0.15);
+            --matrix-green: #00FF41;
+            --cyber-cyan: #00FFFF;
+            --neon-red: #FF0040;
+            --neon-purple: #BF00FF;
+            --text-primary: #E0E0E0;
+            --text-secondary: #B0B0B0;
+            --mobile-breakpoint: 768px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            font-family: 'Fira Code', 'Courier New', monospace;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+        
+        #ambient-grid {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            background-image: 
+                linear-gradient(rgba(0, 255, 65, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 65, 0.05) 1px, transparent 1px);
+            background-size: 20px 20px;
+            opacity: 0.3;
+        }
+        
+        /* Responsive adjustments for ambient grid */
+        @media (max-width: var(--mobile-breakpoint)) {
+            #ambient-grid {
+                background-size: 15px 15px;
+            }
+        }
+        
+        .topbar {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            border: var(--border-glass);
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.37);
+            padding: 1rem;
+            margin: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: var(--mobile-breakpoint)) {
+            .topbar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .brand {
+                margin-bottom: 0.5rem;
+            }
+            
+            .nav-links {
+                width: 100%;
+                justify-content: flex-start;
+            }
+            
+            .nav-links a {
+                margin: 0.2rem 0;
+            }
+            
+            .system-status {
+                margin-top: 0.5rem;
+                align-self: flex-end;
+            }
+            
+            .nav-user {
+                margin-top: 0.5rem;
+                width: 100%;
+                text-align: right;
+            }
+        }
+        
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            text-decoration: none;
+            color: var(--matrix-green);
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .brand-mark {
+            background: var(--matrix-green);
+            color: var(--bg-dark);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        
+        .system-status {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.9rem;
+            color: var(--cyber-cyan);
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--matrix-green);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-family: monospace;
+            position: relative;
+            padding: 0.2rem 0;
+            transition: color 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            color: var(--matrix-green);
+        }
+        
+        .nav-links a::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            width: 0;
+            height: 1px;
+            background-color: var(--matrix-green);
+            transition: width 0.3s ease;
+        }
+        
+        .nav-links a:hover::after {
+            width: 100%;
+        }
+        
+        .nav-button {
+            background: var(--bg-panel);
+            border: var(--border-glass);
+            color: var(--matrix-green);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .nav-button:hover {
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .nav-user {
+            color: var(--cyber-cyan);
+            font-family: monospace;
+        }
+        
+        .nav-cta {
+            background: var(--matrix-green);
+            color: var(--bg-dark);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            font-family: monospace;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-cta:hover {
+            background: rgba(0, 255, 65, 0.8);
+            box-shadow: 0 0 10px rgba(0, 255, 65, 0.7);
+            transform: scale(1.05);
+        }
+        
+        .page-messages {
+            margin: 1rem;
+            max-width: calc(100% - 2rem);
+        }
+        
+        /* Responsive adjustments for messages */
+        @media (max-width: var(--mobile-breakpoint)) {
+            .page-messages {
+                margin: 0.5rem;
+                max-width: calc(100% - 1rem);
+            }
+            
+            .page-messages p {
+                padding: 0.6rem 1rem;
+                margin-bottom: 0.3rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+        .page-messages p {
+            padding: 0.8rem 1.2rem;
+            margin-bottom: 0.5rem;
+            border-radius: 4px;
+            font-family: monospace;
+            border-left: 3px solid;
+        }
+        
+        .page-messages .success {
+            background-color: rgba(0, 255, 65, 0.1);
+            border-color: var(--matrix-green);
+            color: var(--matrix-green);
+        }
+        
+        .page-messages .error {
+            background-color: rgba(255, 0, 64, 0.1);
+            border-color: var(--neon-red);
+            color: var(--neon-red);
+        }
+        
+        .page-messages .warning {
+            background-color: rgba(255, 255, 0, 0.1);
+            border-color: var(--neon-purple);
+            color: var(--neon-purple);
+        }
+        
+        .page-messages .info {
+            background-color: rgba(0, 255, 255, 0.1);
+            border-color: var(--cyber-cyan);
+            color: var(--cyber-cyan);
+        }
+        
+        main {
+            margin: 0 1rem 1rem 1rem;
+            min-height: calc(100vh - 180px);
+        }
+        
+        /* Responsive adjustments for main content */
+        @media (max-width: var(--mobile-breakpoint)) {
+            main {
+                margin: 0 0.5rem 0.5rem 0.5rem;
+                min-height: calc(100vh - 160px);
+            }
+            
+            .app-shell {
+                padding: 1.5rem;
+            }
+        }
+        
+        .app-shell {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            border: var(--border-glass);
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.37);
+            padding: 2rem;
+        }
+        
+        .site-footer {
+            margin: 1rem;
+            text-align: center;
+            padding: 1.5rem;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            font-family: monospace;
+        }
+        
+        .footer-inner {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            margin: 0 0.5rem;
+            transition: color 0.3s ease;
+        }
+        
+        .footer-links a:hover {
+            color: var(--matrix-green);
+        }
+        
+        /* Responsive adjustments for footer */
+        @media (max-width: var(--mobile-breakpoint)) {
+            .site-footer {
+                margin: 0.5rem;
+                padding: 1rem;
+                font-size: 0.8rem;
+            }
+            
+            .footer-inner {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .footer-inner span {
+                margin-bottom: 0.5rem;
+                width: 100%;
+                text-align: center;
+            }
+            
+            .footer-links {
+                justify-content: center;
+                margin-top: 0.5rem;
+            }
+            
+            .footer-links a {
+                margin: 0 0.3rem;
+            }
+        }
+        
+        /* Form elements */
+        input, textarea, select {
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            border: var(--border-glass);
+            color: var(--text-primary);
+            padding: 0.6rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            width: 100%;
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+        
+        input:focus, textarea:focus, select:focus {
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(0, 255, 65, 0.3);
+            border-color: var(--matrix-green);
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: bold;
+            color: var(--matrix-green);
+            font-family: monospace;
+        }
+        
+        button {
+            background: var(--bg-panel);
+            border: var(--border-glass);
+            color: var(--matrix-green);
+            padding: 0.6rem 1.2rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-sizing: border-box;
+        }
+        
+        button:hover {
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        /* Responsive adjustments for forms */
+        @media (max-width: var(--mobile-breakpoint)) {
+            input, textarea, select {
+                padding: 0.5rem;
+                font-size: 0.9rem;
+            }
+            
+            label {
+                margin-bottom: 0.3rem;
+                font-size: 0.9rem;
+            }
+            
+            button {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+        
+        /* Table styles */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1.5rem 0;
+            background: var(--bg-panel);
+            backdrop-filter: blur(16px);
+            border: var(--border-glass);
+            border-radius: 8px;
+            overflow: hidden;
+            display: block;
+            overflow-x: auto;
+        }
+        
+        th, td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.1);
+            font-family: monospace;
+            min-width: 120px;
+        }
+        
+        th {
+            background-color: rgba(0, 255, 65, 0.1);
+            color: var(--matrix-green);
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        tr:hover {
+            background-color: rgba(0, 255, 65, 0.05);
+        }
+        
+        /* Responsive adjustments for tables */
+        @media (max-width: var(--mobile-breakpoint)) {
+            table {
+                margin: 1rem 0;
+                font-size: 0.9rem;
+            }
+            
+            th, td {
+                padding: 0.8rem;
+                min-width: 100px;
+            }
+        }
+        
+        /* Terminal-style button alternative */
+        .terminal-btn {
+            display: inline-block;
+            background: var(--bg-panel);
+            border: var(--border-glass);
+            color: var(--matrix-green);
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            font-family: 'Fira Code', monospace;
+            font-size: 0.9rem;
+            cursor: pointer;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .terminal-btn::before {
+            content: '>';
+            position: absolute;
+            left: -10px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .terminal-btn::after {
+            content: ' █';
+            position: absolute;
+            right: -10px;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .terminal-btn:hover::before {
+            left: 0;
+            opacity: 1;
+        }
+        
+        .terminal-btn:hover::after {
+            right: 0;
+            opacity: 1;
+        }
+        
+        .terminal-btn:hover {
+            background: rgba(0, 255, 65, 0.1);
+            box-shadow: 0 0 15px rgba(0, 255, 65, 0.5);
+        }
+    </style>
+</head>
+<body class="learnify-app {% block body_class %}{% endblock %}">
+    <div id="ambient-grid" aria-hidden="true"></div>
+
+    <header class="topbar app-shell">
+        <a class="brand" href="{% url 'home' %}" aria-label="Learnify home">
+            <span class="brand-mark">L</span>
+            <span>Learnify</span>
+        </a>
+
+        <div class="system-status" aria-label="System status online">
+            <span class="status-dot"></span>
+            <span>SYS_ONLINE</span>
+        </div>
+
+        <nav class="nav-links" aria-label="Primary">
+            <a href="{% url 'home' %}#courses">Courses</a>
+            <a href="{% url 'home' %}#live">Live</a>
+            <a href="{% url 'performance_report' %}">Reports</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'dashboard' %}">Dashboard</a>
+                <a href="{% url 'user_profile' %}">Profile</a>
+                {% if user.is_staff or user.is_superuser %}
+                    <a href="{% url 'instructor_dashboard' %}">Instructor</a>
+                    <a href="{% url 'admin_user_verification' %}">Verify</a>
+                {% endif %}
+                <span class="nav-user">&gt; {{ user.username }}</span>
+                <form method="post" action="{% url 'logout' %}">
+                    {% csrf_token %}
+                    <button class="nav-button" type="submit">logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}">Sign in</a>
+                <a class="nav-cta" href="{% url 'signup' %}">Create account</a>
+            {% endif %}
+        </nav>
+    </header>
+
+    {% if messages %}
+        <div class="page-messages" role="status" aria-live="polite">
+            {% for message in messages %}
+                <p class="{{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main class="app-shell">
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-inner">
+            <span>LEARNIFY_GRID / secure learning runtime</span>
+            <div class="footer-links">
+                <a href="{% url 'home' %}#courses">Courses</a>
+                <a href="{% url 'performance_report' %}">Reports</a>
+                <a href="{% url 'admin_access' %}">Admin</a>
+            </div>
+        </div>
+    </footer>
+
+    <script src="{% static 'courses/core-interactions.js' %}"></script>
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

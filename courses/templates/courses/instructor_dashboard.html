@@ -1,0 +1,226 @@
+{% extends "courses/instructor_base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="topbar">
+    <div>
+        <h1>Instructor Dashboard</h1>
+        <div class="topbar-breadcrumb">
+            <i class="bi bi-house-door"></i> Home / Dashboard
+        </div>
+    </div>
+    <a href="{% url 'instructor_course_create' %}" class="btn-accent">
+        <i class="bi bi-plus-lg"></i> New Course
+    </a>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="icon" style="background: #eff6ff; color: #2563eb;">
+                <i class="bi bi-journal-bookmark"></i>
+            </div>
+            <div class="value">{{ stats.total_courses }}</div>
+            <div class="label">Total Courses</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="icon" style="background: #f0fdf4; color: #16a34a;">
+                <i class="bi bi-check-circle"></i>
+            </div>
+            <div class="value">{{ stats.published_courses }}</div>
+            <div class="label">Published</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="icon" style="background: #fff7ed; color: #ea580c;">
+                <i class="bi bi-people"></i>
+            </div>
+            <div class="value">{{ stats.total_enrollments }}</div>
+            <div class="label">Enrollments</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="icon" style="background: #f5f3ff; color: #7c3aed;">
+                <i class="bi bi-currency-dollar"></i>
+            </div>
+            <div class="value">${{ stats.total_revenue|floatformat:2 }}</div>
+            <div class="label">Revenue</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="icon" style="background: #ecfdf5; color: #059669;">
+                <i class="bi bi-person-check"></i>
+            </div>
+            <div class="value">{{ stats.active_users }}</div>
+            <div class="label">Active Users</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="icon" style="background: #fef2f2; color: #dc2626;">
+                <i class="bi bi-clipboard-check"></i>
+            </div>
+            <div class="value">{{ stats.total_quiz_attempts }}</div>
+            <div class="label">Quiz Attempts</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="icon" style="background: #f0f9ff; color: #0284c7;">
+                <i class="bi bi-camera-video"></i>
+            </div>
+            <div class="value">{{ stats.total_sessions }}</div>
+            <div class="label">Live Sessions</div>
+        </div>
+    </div>
+    <div class="col-6 col-lg-3">
+        <div class="stat-card">
+            <div class="icon" style="background: #fefce8; color: #ca8a04;">
+                <i class="bi bi-shield-exclamation"></i>
+            </div>
+            <div class="value">{{ stats.pending_verifications }}</div>
+            <div class="label">Pending Verifications</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Course Performance -->
+    <div class="col-lg-8">
+        <div class="table-card">
+            <div class="p-3 border-bottom d-flex justify-content-between align-items-center">
+                <h5 class="m-0 fw-semibold">Course Performance</h5>
+                <a href="{% url 'instructor_course_list' %}" class="text-decoration-none" style="color: var(--accent-color); font-size: 0.85rem;">
+                    View All <i class="bi bi-arrow-right"></i>
+                </a>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-card mb-0">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th class="text-center">Enrollments</th>
+                            <th class="text-center">Quiz Attempts</th>
+                            <th class="text-center">Avg Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in course_performance %}
+                        <tr>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if item.course.image %}
+                                        <img src="{{ item.course.image.url }}" alt="" style="width: 40px; height: 28px; object-fit: cover; border-radius: 4px;">
+                                    {% else %}
+                                        <div style="width: 40px; height: 28px; background: #e2e8f0; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                            <i class="bi bi-image text-muted" style="font-size: 0.7rem;"></i>
+                                        </div>
+                                    {% endif %}
+                                    <span class="fw-medium">{{ item.course.title }}</span>
+                                </div>
+                            </td>
+                            <td class="text-center">{{ item.enrollments }}</td>
+                            <td class="text-center">{{ item.attempts }}</td>
+                            <td class="text-center">
+                                <span class="badge {% if item.avg_score >= 70 %}bg-success{% elif item.avg_score >= 50 %}bg-warning{% else %}bg-danger{% endif %}">
+                                    {{ item.avg_score }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-center text-muted py-4">No courses with performance data yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="col-lg-4">
+        <div class="table-card">
+            <div class="p-3 border-bottom">
+                <h5 class="m-0 fw-semibold">Recent Enrollments</h5>
+            </div>
+            <div class="p-0">
+                {% for enrollment in recent_enrollments %}
+                <div class="d-flex align-items-center gap-3 p-3 {% if not forloop.last %}border-bottom{% endif %}">
+                    <div class="flex-shrink-0">
+                        <div style="width: 36px; height: 36px; border-radius: 50%; background: #f1f5f9; display: flex; align-items: center; justify-content: center; font-weight: 600; color: #475569; font-size: 0.85rem;">
+                            {{ enrollment.user.username|first|upper }}
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 min-width-0">
+                        <div class="fw-medium text-truncate">{{ enrollment.user.get_full_name|default:enrollment.user.username }}</div>
+                        <div class="text-muted small text-truncate">{{ enrollment.course.title }}</div>
+                    </div>
+                    <div class="flex-shrink-0 text-muted small">
+                        {{ enrollment.enrolled_at|timesince }} ago
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center text-muted py-4">No recent enrollments.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Quick Links -->
+<div class="row g-3 mt-4">
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="icon m-0" style="background: #eff6ff; color: #2563eb;">
+                <i class="bi bi-journal-plus"></i>
+            </div>
+            <div>
+                <div class="fw-semibold">Create a Course</div>
+                <div class="text-muted small">Add new content to your platform</div>
+            </div>
+            <a href="{% url 'instructor_course_create' %}" class="ms-auto btn-accent" style="padding: 0.375rem 0.75rem; font-size: 0.85rem;">
+                Go <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="icon m-0" style="background: #f0fdf4; color: #16a34a;">
+                <i class="bi bi-people"></i>
+            </div>
+            <div>
+                <div class="fw-semibold">Manage Users</div>
+                <div class="text-muted small">{{ stats.pending_verifications }} pending verifications</div>
+            </div>
+            <a href="{% url 'admin_user_verification' %}" class="ms-auto btn-accent" style="padding: 0.375rem 0.75rem; font-size: 0.85rem;">
+                Go <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card d-flex align-items-center gap-3">
+            <div class="icon m-0" style="background: #f5f3ff; color: #7c3aed;">
+                <i class="bi bi-bar-chart-line"></i>
+            </div>
+            <div>
+                <div class="fw-semibold">View Reports</div>
+                <div class="text-muted small">Comprehensive platform analytics</div>
+            </div>
+            <a href="{% url 'comprehensive_report' %}" class="ms-auto btn-accent" style="padding: 0.375rem 0.75rem; font-size: 0.85rem;">
+                Go <i class="bi bi-arrow-right"></i>
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

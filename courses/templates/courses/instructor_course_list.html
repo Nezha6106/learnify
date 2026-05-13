@@ -1,0 +1,809 @@
+{% extends "courses/instructor_base.html" %}
+
+{% block title %}Manage Courses{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --void: #050505;
+        --glass: rgba(10, 15, 12, 0.45);
+        --glass-strong: rgba(6, 12, 9, 0.72);
+        --green: #00FF41;
+        --cyan: #00FFFF;
+        --purple: #a855f7;
+        --red: #ff3860;
+        --amber: #fbbf24;
+        --text: #e7fff0;
+        --muted: #6f7f78;
+        --line: rgba(0, 255, 65, 0.15);
+        --mono: "Fira Code", "Space Mono", "Consolas", monospace;
+    }
+
+    body {
+        background:
+            radial-gradient(circle at 12% 8%, rgba(0, 255, 65, 0.12), transparent 28%),
+            radial-gradient(circle at 84% 80%, rgba(0, 255, 255, 0.08), transparent 34%),
+            var(--void) !important;
+        color: var(--text);
+        font-family: var(--mono);
+    }
+
+    .main-content {
+        background: transparent;
+        font-family: var(--mono);
+    }
+
+    .cyber-topbar,
+    .cyber-filter,
+    .directory-grid,
+    .cyber-pagination {
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .cyber-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 24px;
+        padding: 22px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .cyber-topbar::before,
+    .cyber-filter::before,
+    .directory-grid::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.14), transparent) top / 100% 1px no-repeat;
+        pointer-events: none;
+    }
+
+    .cyber-kicker {
+        color: var(--cyan);
+        font-size: 0.74rem;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    .cyber-topbar h1 {
+        margin: 5px 0 6px;
+        color: var(--green);
+        font-family: var(--mono);
+        font-size: clamp(1.6rem, 4vw, 2.8rem);
+        text-shadow: 0 0 18px rgba(0, 255, 65, 0.34);
+    }
+
+    .topbar-breadcrumb {
+        color: var(--muted);
+        font-family: var(--mono);
+        font-size: 0.82rem;
+    }
+
+    .cyber-btn,
+    .btn-accent,
+    .page-link {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        min-height: 42px;
+        border: 1px solid rgba(0, 255, 65, 0.24) !important;
+        border-radius: 6px !important;
+        background: linear-gradient(90deg, var(--green), #32ff73) !important;
+        color: #050505 !important;
+        font-family: var(--mono);
+        font-weight: 900;
+        text-decoration: none;
+        overflow: hidden;
+        box-shadow: 0 0 22px rgba(0, 255, 65, 0.24);
+    }
+
+    .cyber-btn:hover,
+    .btn-accent:hover,
+    .page-link:hover {
+        animation: cyber-glitch 0.42s steps(2, end) infinite;
+        text-shadow: -2px 0 var(--cyan), 2px 0 var(--red);
+    }
+
+    @keyframes cyber-glitch {
+        0%, 100% { transform: translate(0); }
+        35% { transform: translate(-1px, 1px); }
+        70% { transform: translate(1px, -1px); }
+    }
+
+    .cyber-filter {
+        position: relative;
+        margin-bottom: 24px;
+        padding: 20px;
+    }
+
+    .filter-grid {
+        display: grid;
+        grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(150px, 0.8fr)) auto;
+        gap: 14px;
+        align-items: end;
+    }
+
+    .terminal-field {
+        display: grid;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 0.72rem;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    .terminal-control {
+        position: relative;
+    }
+
+    .terminal-control::before {
+        content: ">";
+        position: absolute;
+        left: 13px;
+        top: 50%;
+        z-index: 1;
+        transform: translateY(-50%);
+        color: var(--green);
+        pointer-events: none;
+    }
+
+    .terminal-control input,
+    .terminal-control select {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid rgba(0, 255, 65, 0.22);
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.38);
+        color: var(--text);
+        caret-color: var(--cyan);
+        font-family: var(--mono);
+        padding: 10px 13px 10px 32px;
+        outline: none;
+    }
+
+    .terminal-control input:focus,
+    .terminal-control select:focus {
+        border-color: var(--cyan);
+        background: rgba(0, 255, 255, 0.045);
+        box-shadow: 0 0 0 1px rgba(0, 255, 255, 0.18), 0 0 24px rgba(0, 255, 255, 0.16);
+    }
+
+    .clear-link {
+        display: inline-flex;
+        margin-top: 12px;
+        color: var(--cyan);
+        font-size: 0.78rem;
+        font-weight: 900;
+        text-decoration: none;
+    }
+
+    .directory-grid {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .directory-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: collapse;
+        color: var(--text);
+        font-family: var(--mono);
+    }
+
+    .directory-table thead {
+        background: rgba(0, 255, 65, 0.055);
+    }
+
+    .directory-table th {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(0, 255, 65, 0.14);
+        color: var(--cyan);
+        font-size: 0.72rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        white-space: nowrap;
+    }
+
+    .directory-table td {
+        padding: 15px 16px;
+        border-bottom: 1px solid rgba(0, 255, 65, 0.08);
+        vertical-align: middle;
+        font-size: 0.86rem;
+    }
+
+    .directory-table tbody tr {
+        transition: background 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .directory-table tbody tr:hover {
+        background: rgba(0, 255, 65, 0.035);
+        box-shadow: inset 2px 0 0 var(--green);
+    }
+
+    .course-thumb {
+        display: grid;
+        width: 50px;
+        height: 34px;
+        place-items: center;
+        overflow: hidden;
+        border: 1px solid rgba(0, 255, 255, 0.2);
+        border-radius: 5px;
+        background: rgba(0, 255, 255, 0.045);
+        color: var(--cyan);
+    }
+
+    .course-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        filter: saturate(1.15) contrast(1.08);
+    }
+
+    .course-title {
+        color: var(--text);
+        font-weight: 900;
+    }
+
+    .course-sub {
+        margin-top: 3px;
+        color: var(--muted);
+        font-size: 0.75rem;
+    }
+
+    .cyber-badge {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 26px;
+        padding: 0 10px;
+        border: 1px solid rgba(0, 255, 255, 0.18);
+        border-radius: 999px;
+        color: var(--cyan);
+        background: rgba(0, 255, 255, 0.045);
+        font-size: 0.72rem;
+        font-weight: 900;
+        white-space: nowrap;
+    }
+
+    .level-beginner { color: var(--green); border-color: rgba(0, 255, 65, 0.24); background: rgba(0, 255, 65, 0.055); }
+    .level-intermediate { color: var(--amber); border-color: rgba(251, 191, 36, 0.25); background: rgba(251, 191, 36, 0.055); }
+    .level-advanced { color: var(--red); border-color: rgba(255, 56, 96, 0.25); background: rgba(255, 56, 96, 0.055); }
+
+    .badge-published,
+    .badge-draft {
+        display: inline-flex;
+        min-height: 26px;
+        align-items: center;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    .badge-published {
+        color: var(--green);
+        border: 1px solid rgba(0, 255, 65, 0.32);
+        background: rgba(0, 255, 65, 0.065);
+        box-shadow: 0 0 16px rgba(0, 255, 65, 0.14);
+    }
+
+    .badge-draft {
+        color: var(--purple);
+        border: 1px solid rgba(168, 85, 247, 0.32);
+        background: rgba(168, 85, 247, 0.07);
+        box-shadow: 0 0 16px rgba(168, 85, 247, 0.12);
+    }
+
+    .price-free {
+        color: var(--green);
+        font-weight: 900;
+    }
+
+    .btn-icon {
+        width: 34px;
+        height: 34px;
+        border: 1px solid rgba(0, 255, 255, 0.22) !important;
+        border-radius: 6px;
+        background: rgba(0, 255, 255, 0.045) !important;
+        color: var(--cyan) !important;
+        box-shadow: none;
+    }
+
+    .btn-icon:hover {
+        border-color: var(--cyan) !important;
+        box-shadow: 0 0 16px rgba(0, 255, 255, 0.18);
+    }
+
+    .btn-icon.btn-danger {
+        color: var(--red) !important;
+        border-color: rgba(255, 56, 96, 0.22) !important;
+        background: rgba(255, 56, 96, 0.045) !important;
+    }
+
+    .empty-directory {
+        padding: 54px 18px;
+        text-align: center;
+        color: var(--muted);
+    }
+
+    .cyber-pagination {
+        display: flex;
+        justify-content: center;
+        margin-top: 22px;
+        padding: 12px;
+    }
+
+    .pagination {
+        margin: 0;
+        gap: 8px;
+    }
+
+    .page-item.active .page-link {
+        background: var(--cyan) !important;
+        border-color: var(--cyan) !important;
+        color: #050505 !important;
+    }
+
+    @media (max-width: 1100px) {
+        .filter-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+    }
+
+    @media (max-width: 760px) {
+        .cyber-topbar,
+        .filter-grid {
+            align-items: stretch;
+            grid-template-columns: 1fr;
+        }
+
+        .cyber-topbar {
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .cyber-topbar {
+            padding: 16px;
+            margin-bottom: 16px;
+            gap: 12px;
+        }
+        
+        .cyber-kicker {
+            font-size: 0.65rem !important;
+        }
+        
+        .cyber-topbar h1 {
+            font-size: clamp(1.25rem, 5vw, 2rem) !important;
+            margin: 4px 0 4px;
+        }
+        
+        .topbar-breadcrumb {
+            font-size: 0.7rem !important;
+        }
+        
+        .cyber-btn {
+            min-height: 36px !important;
+            padding: 0 12px !important;
+            font-size: 0.8rem !important;
+        }
+        
+        .filter-grid {
+            gap: 12px;
+            padding: 16px;
+        }
+        
+        .terminal-field {
+            margin-bottom: 8px;
+        }
+        
+        .terminal-field label {
+            font-size: 0.65rem !important;
+            margin-bottom: 4px;
+        }
+        
+        .terminal-control::before {
+            left: 10px;
+            font-size: 0.75rem;
+        }
+        
+        .terminal-control input,
+        .terminal-control select {
+            min-height: 38px;
+            padding: 8px 8px 8px 28px;
+            font-size: 0.8rem !important;
+        }
+        
+        .clear-link {
+            font-size: 0.7rem !important;
+            margin-top: 8px;
+        }
+        
+        .directory-table {
+            font-size: 0.8rem !important;
+        }
+        
+        .directory-table thead {
+            display: none;
+        }
+        
+        .directory-table tbody {
+            display: block;
+        }
+        
+        .directory-table tr {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 16px;
+            padding: 16px;
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.37);
+        }
+        
+        .directory-table td {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 255, 65, 0.1);
+        }
+        
+        .directory-table td:last-child {
+            border-bottom: none;
+        }
+        
+        .directory-table td::before {
+            content: attr(data-label);
+            font-weight: bold;
+            color: var(--cyan);
+            min-width: 80px;
+        }
+        
+        .course-thumb {
+            width: 40px;
+            height: 28px;
+        }
+        
+        .course-title {
+            font-weight: 900;
+            font-size: 0.9rem;
+        }
+        
+        .course-sub {
+            font-size: 0.7rem;
+            margin-top: 2px;
+        }
+        
+        .cyber-badge {
+            font-size: 0.65rem;
+            padding: 0 8px;
+            min-height: 22px;
+        }
+        
+        .badge-published,
+        .badge-draft {
+            font-size: 0.65rem;
+            padding: 0 8px;
+            min-height: 22px;
+        }
+        
+        .price-free {
+            font-size: 0.75rem;
+            font-weight: 900;
+        }
+        
+        .btn-icon {
+            width: 28px;
+            height: 28px;
+        }
+        
+        .empty-directory {
+            padding: 24px 12px;
+        }
+        
+        .empty-directory strong {
+            font-size: 0.9rem;
+        }
+        
+        .empty-directory p {
+            font-size: 0.8rem;
+        }
+        
+        .cyber-pagination {
+            margin-top: 16px;
+            padding: 8px;
+        }
+        
+        .pagination {
+            gap: 6px;
+        }
+        
+        .page-item.active .page-link {
+            min-width: 36px;
+            height: 36px;
+            font-size: 0.8rem;
+        }
+        
+        .page-link {
+            min-width: 36px;
+            height: 36px;
+            font-size: 0.8rem;
+        }
+        
+        .nav-links a {
+            font-size: 0.8rem !important;
+            margin: 0 4px;
+        }
+        
+        .brand {
+            font-size: 0.9rem !important;
+        }
+        
+        .brand-mark {
+            width: 24px;
+            height: 24px;
+        }
+    }
+
+    @media (max-width: 320px) {
+        .cyber-topbar {
+            padding: 12px;
+        }
+        
+        .cyber-kicker {
+            font-size: 0.6rem !important;
+        }
+        
+        .cyber-topbar h1 {
+            font-size: 1.2rem !important;
+        }
+        
+        .topbar-breadcrumb {
+            font-size: 0.65rem !important;
+        }
+        
+        .filter-grid {
+            padding: 12px;
+        }
+        
+        .terminal-control input,
+        .terminal-control select {
+            min-height: 36px;
+            padding: 6px 6px 6px 24px;
+        }
+        
+        .directory-table td::before {
+            min-width: 70px;
+            font-size: 0.75rem;
+        }
+        
+        .course-thumb {
+            width: 32px;
+            height: 22px;
+        }
+        
+        .course-title {
+            font-size: 0.8rem;
+        }
+        
+        .course-sub {
+            font-size: 0.65rem;
+        }
+        
+        .cyber-btn {
+            min-height: 32px !important;
+            padding: 0 10px !important;
+            font-size: 0.75rem !important;
+        }
+        
+        .clear-link {
+            font-size: 0.65rem !important;
+        }
+        
+        .empty-directory strong {
+            font-size: 0.8rem;
+        }
+        
+        .empty-directory p {
+            font-size: 0.7rem;
+        }
+        
+        .cyber-pagination {
+            margin-top: 12px;
+        }
+        
+        .page-item.active .page-link,
+        .page-link {
+            min-width: 32px;
+            height: 32px;
+            font-size: 0.7rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cyber-topbar">
+    <div>
+        <div class="cyber-kicker">SERVER_DIRECTORY</div>
+        <h1>Manage Courses</h1>
+        <div class="topbar-breadcrumb">Home / Courses / Registry Scan</div>
+    </div>
+    <a href="{% url 'instructor_course_create' %}" class="cyber-btn">
+        NEW_COURSE_NODE
+    </a>
+</div>
+
+<section class="cyber-filter">
+    <form method="get" class="filter-grid">
+        <label class="terminal-field">
+            Search
+            <span class="terminal-control">
+                <input type="text" name="q" placeholder="SCAN_DIRECTORY" value="{{ search_query }}">
+            </span>
+        </label>
+
+        <label class="terminal-field">
+            Category
+            <span class="terminal-control">
+                <select name="category">
+                    <option value="">ALL_CATEGORIES</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </span>
+        </label>
+
+        <label class="terminal-field">
+            Level
+            <span class="terminal-control">
+                <select name="level">
+                    <option value="">ALL_LEVELS</option>
+                    {% for lvl_key, lvl_label in levels %}
+                    <option value="{{ lvl_key }}" {% if selected_level == lvl_key %}selected{% endif %}>{{ lvl_label }}</option>
+                    {% endfor %}
+                </select>
+            </span>
+        </label>
+
+        <label class="terminal-field">
+            Status
+            <span class="terminal-control">
+                <select name="status">
+                    <option value="">ALL_STATUS</option>
+                    <option value="published" {% if selected_status == 'published' %}selected{% endif %}>PUBLISHED</option>
+                    <option value="draft" {% if selected_status == 'draft' %}selected{% endif %}>DRAFT</option>
+                </select>
+            </span>
+        </label>
+
+        <button type="submit" class="cyber-btn">FILTER</button>
+    </form>
+    {% if search_query or selected_category or selected_level or selected_status %}
+    <a href="{% url 'instructor_course_list' %}" class="clear-link">CLEAR_FILTERS</a>
+    {% endif %}
+</section>
+
+<section class="directory-grid">
+    <div class="table-responsive">
+        <table class="directory-table">
+            <thead>
+                <tr>
+                    <th>Packet</th>
+                    <th>Course Node</th>
+                    <th>Category</th>
+                    <th>Level</th>
+                    <th class="text-center">Price</th>
+                    <th class="text-center">Status</th>
+                    <th class="text-center">Enrolled</th>
+                    <th class="text-center">Questions</th>
+                    <th class="text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in courses %}
+                <tr>
+                    <td>
+                        <span class="course-thumb">
+                            {% if course.image %}
+                                <img src="{{ course.image.url }}" alt="">
+                            {% else %}
+                                IMG
+                            {% endif %}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="course-title">{{ course.title }}</div>
+                        <div class="course-sub">{{ course.duration }}</div>
+                    </td>
+                    <td><span class="cyber-badge">{{ course.category }}</span></td>
+                    <td>
+                        <span class="cyber-badge {% if course.level == 'Beginner' %}level-beginner{% elif course.level == 'Intermediate' %}level-intermediate{% else %}level-advanced{% endif %}">
+                            {{ course.level }}
+                        </span>
+                    </td>
+                    <td class="text-center">
+                        {% if course.price > 0 %}
+                            ${{ course.price }}
+                        {% else %}
+                            <span class="price-free">FREE</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">
+                        {% if course.is_published %}
+                            <span class="badge-published">Published</span>
+                        {% else %}
+                            <span class="badge-draft">Draft</span>
+                        {% endif %}
+                    </td>
+                    <td class="text-center">{{ course.enrollments.count }}</td>
+                    <td class="text-center">{{ course.quiz_questions.count }}</td>
+                    <td class="text-center">
+                        <a href="{% url 'instructor_course_update' course.slug %}" class="btn-icon" title="Edit">
+                            <i class="bi bi-pencil"></i>
+                        </a>
+                        <a href="{% url 'instructor_course_delete' course.slug %}" class="btn-icon btn-danger" title="Delete">
+                            <i class="bi bi-trash"></i>
+                        </a>
+                        <a href="{% url 'course_detail' course.slug %}" target="_blank" class="btn-icon" title="Preview">
+                            <i class="bi bi-box-arrow-up-right"></i>
+                        </a>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9">
+                        <div class="empty-directory">
+                            <strong>NO_COURSE_NODES_FOUND</strong>
+                            <p class="mt-2 mb-3">The directory scan returned no deployable course records.</p>
+                            <a href="{% url 'instructor_course_create' %}" class="cyber-btn">CREATE_FIRST_NODE</a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</section>
+
+{% if is_paginated %}
+<nav class="cyber-pagination">
+    <ul class="pagination justify-content-center">
+        {% if page_obj.has_previous %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_level %}&level={{ selected_level }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">&laquo;</a>
+        </li>
+        {% endif %}
+        {% for num in page_obj.paginator.page_range %}
+            {% if page_obj.number == num %}
+            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+            <li class="page-item">
+                <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_level %}&level={{ selected_level }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">{{ num }}</a>
+            </li>
+            {% endif %}
+        {% endfor %}
+        {% if page_obj.has_next %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_level %}&level={{ selected_level }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">&raquo;</a>
+        </li>
+        {% endif %}
+    </ul>
+</nav>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,164 @@
+{% extends "registration/auth_base.html" %}
+
+{% block title %}Register | Learnify LMS{% endblock %}
+
+{% block auth_header %}
+    <h1>NEW_ENROLLMENT</h1>
+    <p>// Registering new entity in the network</p>
+{% endblock %}
+
+{% block auth_content %}
+    {% if form.non_field_errors %}
+        <div class="auth-alert-box">
+            {% for error in form.non_field_errors %}[ERROR] {{ error }}{% endfor %}
+        </div>
+    {% endif %}
+
+    <form method="post" class="auth-form auth-step-form" id="signup-form" autocomplete="on">
+        {% csrf_token %}
+
+        <div class="auth-progress" aria-label="Enrollment progress">
+            <span class="auth-progress-node active" data-progress-node="1"></span>
+            <span class="auth-progress-node" data-progress-node="2"></span>
+            <span class="auth-progress-node" data-progress-node="3"></span>
+        </div>
+
+        <section class="auth-step active" data-step="1" aria-labelledby="signup-step-1">
+            <div class="auth-step-header">
+                <span>STEP_01</span>
+                <strong id="signup-step-1">IDENTITY_MAP</strong>
+            </div>
+
+            <div class="auth-form-group">
+                <label for="id_full_name">FULL_NAME</label>
+                <div class="terminal-field">
+                    <input type="text" name="full_name" id="id_full_name"
+                           class="terminal-input"
+                           value="{{ form.full_name.value|default_if_none:'' }}"
+                           placeholder="ALEX CARTER" required
+                           autocomplete="name"
+                           aria-invalid="{% if form.full_name.errors %}true{% else %}false{% endif %}">
+                    <span class="auth-input-cursor" aria-hidden="true">█</span>
+                </div>
+                {% if form.full_name.errors %}
+                    <div class="auth-field-error">{{ form.full_name.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="auth-form-group">
+                <label for="id_username">USER_ID</label>
+                <div class="terminal-field">
+                    <input type="text" name="username" id="id_username"
+                           class="terminal-input"
+                           value="{{ form.username.value|default_if_none:'' }}"
+                           placeholder="OPERATOR_HANDLE" required
+                           autocomplete="username"
+                           aria-invalid="{% if form.username.errors %}true{% else %}false{% endif %}">
+                    <span class="auth-input-cursor" aria-hidden="true">█</span>
+                </div>
+                {% if form.username.errors %}
+                    <div class="auth-field-error">{{ form.username.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="auth-step" data-step="2" aria-labelledby="signup-step-2">
+            <div class="auth-step-header">
+                <span>STEP_02</span>
+                <strong id="signup-step-2">ACCESS_PROFILE</strong>
+            </div>
+
+            <div class="auth-form-group">
+                <label for="id_email">COMM_LINK</label>
+                <div class="terminal-field">
+                    <input type="email" name="email" id="id_email"
+                           class="terminal-input"
+                           value="{{ form.email.value|default_if_none:'' }}"
+                           placeholder="you@network.net" required
+                           autocomplete="email"
+                           inputmode="email"
+                           aria-invalid="{% if form.email.errors %}true{% else %}false{% endif %}">
+                    <span class="auth-input-cursor" aria-hidden="true">█</span>
+                </div>
+                {% if form.email.errors %}
+                    <div class="auth-field-error">{{ form.email.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="auth-form-group">
+                <label for="id_role">ROLE_PROTOCOL</label>
+                <div class="terminal-field terminal-select-field">
+                    <select name="role" id="id_role" class="terminal-input" autocomplete="organization-title" required>
+                        <option value="student" {% if form.role.value == "student" or not form.role.value %}selected{% endif %}>STUDENT</option>
+                        <option value="instructor" {% if form.role.value == "instructor" %}selected{% endif %}>INSTRUCTOR</option>
+                        <option value="admin" {% if form.role.value == "admin" %}selected{% endif %}>ADMIN</option>
+                    </select>
+                </div>
+                {% if form.role.errors %}
+                    <div class="auth-field-error">{{ form.role.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </section>
+
+        <section class="auth-step" data-step="3" aria-labelledby="signup-step-3">
+            <div class="auth-step-header">
+                <span>STEP_03</span>
+                <strong id="signup-step-3">KEY_EXCHANGE</strong>
+            </div>
+
+            <div class="auth-form-group">
+                <label for="id_password1">ENCRYPTION_KEY</label>
+                <div class="terminal-field">
+                    <input type="password" name="password1" id="id_password1"
+                           class="terminal-input"
+                           placeholder="SECURE_KEY" required
+                           autocomplete="new-password"
+                           aria-invalid="{% if form.password1.errors %}true{% else %}false{% endif %}">
+                    <span class="auth-input-cursor" aria-hidden="true">█</span>
+                </div>
+
+                <div class="password-meter-container" aria-live="polite">
+                    <div class="password-meter-bar">
+                        <div id="password-fill" class="password-meter-fill"></div>
+                    </div>
+                    <div class="password-meter-label">
+                        <span id="password-status">STRENGTH: VOID</span>
+                        <span id="password-percent">0%</span>
+                    </div>
+                </div>
+
+                {% if form.password1.errors %}
+                    <div class="auth-field-error">{{ form.password1.errors.0 }}</div>
+                {% endif %}
+            </div>
+
+            <div class="auth-form-group">
+                <label for="id_password2">VERIFY_KEY</label>
+                <div class="terminal-field">
+                    <input type="password" name="password2" id="id_password2"
+                           class="terminal-input"
+                           placeholder="RE-ENTER_KEY" required
+                           autocomplete="new-password"
+                           aria-invalid="{% if form.password2.errors %}true{% else %}false{% endif %}">
+                    <span class="auth-input-cursor" aria-hidden="true">█</span>
+                </div>
+                <div class="auth-field-error auth-match-status" id="password-match-status" aria-live="polite"></div>
+                {% if form.password2.errors %}
+                    <div class="auth-field-error">{{ form.password2.errors.0 }}</div>
+                {% endif %}
+            </div>
+        </section>
+
+        <div class="auth-step-actions">
+            <button type="button" class="button secondary auth-step-btn" data-step-prev hidden>BACKTRACE</button>
+            <button type="button" class="button primary auth-step-btn" data-step-next>NEXT_VECTOR</button>
+            <button type="submit" class="button primary auth-submit-btn" data-step-submit data-glitch="EXECUTE ENROLLMENT" hidden>
+                <span>EXECUTE ENROLLMENT</span>
+            </button>
+        </div>
+    </form>
+{% endblock %}
+
+{% block auth_footer %}
+    Already verified? <a href="{% url 'login' %}">INITIALIZE_SESSION</a>
+{% endblock %}

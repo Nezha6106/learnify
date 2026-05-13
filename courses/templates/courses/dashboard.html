@@ -1,0 +1,250 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Learnify LMS — Your personal command center for enrolled courses, live sessions, and quiz progress.">
+    <title>Command Center | Learnify</title>
+    <link rel="stylesheet" href="{% static 'courses/hacker-theme.css' %}">
+</head>
+<body>
+    <!-- Ambient grid background -->
+    <div id="ambient-grid" aria-hidden="true"></div>
+
+    <!-- ═══ COMMAND CENTER (NAVBAR) ═══ -->
+    <header class="topbar">
+        <a class="brand" href="{% url 'home' %}" aria-label="Learnify home">
+            <span class="brand-mark">L</span>
+            <span>Learnify</span>
+        </a>
+
+        <div class="system-status" aria-label="System status: online">
+            <span class="status-dot"></span>
+            <span>SYS_ONLINE</span>
+        </div>
+
+        <nav class="nav-links" aria-label="Primary navigation">
+            <a href="{% url 'home' %}#courses">Courses</a>
+            <a href="{% url 'performance_report' %}">Reports</a>
+            <a href="{% url 'admin_access' %}">Admin</a>
+            <a href="{% url 'user_profile' %}">Profile</a>
+
+            <span class="hotkey-hint" id="palette-hint">
+                <kbd>Ctrl</kbd>+<kbd>K</kbd>
+            </span>
+
+            <span class="nav-user">&gt; {{ user.username }}</span>
+
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="nav-button" type="submit">logout</button>
+            </form>
+        </nav>
+    </header>
+
+    <!-- ═══ COMMAND PALETTE OVERLAY ═══ -->
+    <div id="command-overlay" class="command-overlay" role="dialog" aria-label="Command palette">
+        <div class="command-palette">
+            <div class="command-header">
+                <span class="command-prompt">&gt;_</span>
+                <input id="command-input" class="command-input" type="text"
+                       placeholder="Type a command or course name..." autocomplete="off">
+            </div>
+            <div id="command-body" class="command-body">
+                <!-- Static nav items -->
+                <div class="command-item" data-label="Dashboard Home" data-href="{% url 'dashboard' %}">
+                    <span class="command-item-icon">⌂</span> Dashboard
+                </div>
+                <div class="command-item" data-label="Browse Courses" data-href="{% url 'home' %}#courses">
+                    <span class="command-item-icon">◈</span> Browse Courses
+                </div>
+                <div class="command-item" data-label="Performance Reports" data-href="{% url 'performance_report' %}">
+                    <span class="command-item-icon">◉</span> Reports
+                </div>
+                <div class="command-item" data-label="User Profile Settings" data-href="{% url 'user_profile' %}">
+                    <span class="command-item-icon">◎</span> Profile
+                </div>
+                <!-- Enrolled courses as navigable items -->
+                {% for enrollment in enrollments %}
+                <div class="command-item" data-label="{{ enrollment.course.title }}" data-href="{{ enrollment.course.get_absolute_url }}">
+                    <span class="command-item-icon">►</span> {{ enrollment.course.title }}
+                </div>
+                {% endfor %}
+            </div>
+            <div class="command-footer">
+                <span><kbd>↑↓</kbd> navigate</span>
+                <span><kbd>↵</kbd> open</span>
+                <span><kbd>esc</kbd> close</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══ MAIN DASHBOARD ═══ -->
+    <main>
+        <section class="dashboard-layout">
+
+            <!-- Hero header with typing effect -->
+            <div class="report-header">
+                <p class="eyebrow">// student.command_center</p>
+                <h1 class="glitch-text">Welcome back, {{ user.username }}.</h1>
+                <div class="typing-container">
+                    <span id="typing-text" style="visibility:hidden"
+                          data-text="Your enrolled courses, live Zoom classes, and quiz progress are aggregated here. Press Ctrl+K to open the command palette.">
+                        Your enrolled courses, live Zoom classes, and quiz progress are aggregated here. Press Ctrl+K to open the command palette.
+                    </span>
+                </div>
+            </div>
+
+            <!-- ── STAT PANELS ──────────────────────────────── -->
+            <section class="dashboard-grid" aria-label="Dashboard summary">
+                <div class="progress-panel">
+                    <span class="panel-label">Enrollments</span>
+                    <strong>{{ enrollments|length }}</strong>
+                    <p class="hero-text">Courses you have joined on Learnify.</p>
+                </div>
+                <div class="progress-panel">
+                    <span class="panel-label">Live Classes</span>
+                    <strong>{{ sessions|length }}</strong>
+                    <p class="hero-text">Zoom sessions available from your courses.</p>
+                </div>
+                <div class="progress-panel">
+                    <span class="panel-label">Quiz Attempts</span>
+                    <strong>{{ attempts|length }}</strong>
+                    <p class="hero-text">Recent submissions linked to your account.</p>
+                </div>
+            </section>
+
+            <!-- ── ENROLLED COURSES ─────────────────────────── -->
+            <section class="course-section">
+                <div class="section-heading compact-heading">
+                    <div>
+                        <p class="eyebrow">// my.learning</p>
+                        <h2>Enrolled Courses</h2>
+                    </div>
+                    <a class="button secondary" href="{% url 'home' %}#courses">Browse more</a>
+                </div>
+                <div class="course-grid dashboard-courses">
+                    {% for enrollment in enrollments %}
+                        <article class="course-card">
+                            <div class="course-meta">
+                                <span>{{ enrollment.course.category }}</span>
+                                <span>{{ enrollment.course.duration }}</span>
+                            </div>
+                            <h3>{{ enrollment.course.title }}</h3>
+                            <p>{{ enrollment.course.summary }}</p>
+                            <div class="course-footer">
+                                <span>{{ enrollment.course.lessons.count }} lessons</span>
+                                <a class="card-action" href="{{ enrollment.course.get_absolute_url }}">Continue</a>
+                            </div>
+                        </article>
+                    {% empty %}
+                        <p class="empty-state">&gt; No courses enrolled. Execute `browse` to find courses.</p>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- ── ANNOUNCEMENTS + SESSIONS / MATERIALS + QUIZ ── -->
+            <section class="dashboard-columns">
+                <div>
+                    <div class="section-heading compact-heading">
+                        <div>
+                            <p class="eyebrow">// sys.updates</p>
+                            <h2>Announcements</h2>
+                        </div>
+                    </div>
+                    <div class="session-list">
+                        {% for enrollment in enrollments %}
+                            {% for announcement in enrollment.course.announcements.all %}
+                                <article class="session-card">
+                                    <span>{{ announcement.created_at|date:"M d, Y" }}</span>
+                                    <h3>{{ announcement.title }}</h3>
+                                    <p>{{ enrollment.course.title }}</p>
+                                    <p>{{ announcement.message }}</p>
+                                </article>
+                            {% empty %}
+                            {% endfor %}
+                        {% empty %}
+                            <p class="empty-state">&gt; Enroll in a course to receive announcements.</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="section-heading compact-heading" style="margin-top: 32px;">
+                        <div>
+                            <p class="eyebrow">// zoom.classroom</p>
+                            <h2>Live Classes</h2>
+                        </div>
+                    </div>
+                    <div class="session-list">
+                        {% for session in sessions %}
+                            <article class="session-card">
+                                <span>{{ session.starts_at|date:"M d, Y H:i" }}</span>
+                                <h3>{{ session.title }}</h3>
+                                <p>{{ session.course.title }} / {{ session.duration_minutes }} min / {{ session.host_name }}</p>
+                                {% if session.meeting_id %}
+                                    <p>Meeting ID: {{ session.meeting_id }}{% if session.passcode %} / Passcode: {{ session.passcode }}{% endif %}</p>
+                                {% endif %}
+                                <a class="card-action" href="{{ session.zoom_url }}" target="_blank" rel="noopener">Join Zoom</a>
+                            </article>
+                        {% empty %}
+                            <p class="empty-state">&gt; Enroll in a course to unlock Zoom sessions.</p>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <div>
+                    <div class="section-heading compact-heading">
+                        <div>
+                            <p class="eyebrow">// resources.index</p>
+                            <h2>Course Materials</h2>
+                        </div>
+                    </div>
+                    <div class="session-list">
+                        {% for enrollment in enrollments %}
+                            {% for material in enrollment.course.materials.all %}
+                                <article class="session-card">
+                                    <span>{{ material.material_type }}</span>
+                                    <h3>{{ material.title }}</h3>
+                                    <p>{{ enrollment.course.title }}</p>
+                                    <a class="card-action" href="{{ material.material_url }}" target="_blank" rel="noopener">Open</a>
+                                </article>
+                            {% empty %}
+                            {% endfor %}
+                        {% empty %}
+                            <p class="empty-state">&gt; Enroll in a course to unlock materials.</p>
+                        {% endfor %}
+                    </div>
+
+                    <div class="section-heading compact-heading" style="margin-top: 32px;">
+                        <div>
+                            <p class="eyebrow">// progress.log</p>
+                            <h2>Recent Quiz Marks</h2>
+                        </div>
+                    </div>
+                    <section class="attempt-table" aria-label="Recent quiz attempts">
+                        <div class="attempt-row table-head">
+                            <span>Course</span>
+                            <span>Marks</span>
+                            <span>Progress</span>
+                            <span>Submitted</span>
+                        </div>
+                        {% for attempt in attempts %}
+                            <div class="attempt-row">
+                                <span>{{ attempt.course.title }}</span>
+                                <span>{{ attempt.score }}/{{ attempt.total_questions }}</span>
+                                <span>{{ attempt.percentage }}%</span>
+                                <span>{{ attempt.submitted_at|date:"M d, Y H:i" }}</span>
+                            </div>
+                        {% empty %}
+                            <p class="empty-state">&gt; Submit a quiz to see your marks here.</p>
+                        {% endfor %}
+                    </section>
+                </div>
+            </section>
+
+        </section>
+    </main>
+
+    <script src="{% static 'courses/core-interactions.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,567 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile | Learnify</title>
+    <link rel="stylesheet" href="{% static 'courses/hacker-theme.css' %}">
+    <style>
+        :root {
+            --void: #050505;
+            --glass: rgba(10, 15, 12, 0.45);
+            --green: #00FF41;
+            --cyan: #00FFFF;
+            --purple: #a855f7;
+            --red: #ff3860;
+            --amber: #fbbf24;
+            --text: #e7fff0;
+            --muted: #6f7f78;
+            --line: rgba(0, 255, 65, 0.15);
+            --mono: "Fira Code", "Space Mono", "Consolas", monospace;
+        }
+
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 18% 8%, rgba(0, 255, 65, 0.12), transparent 28%),
+                radial-gradient(circle at 86% 76%, rgba(0, 255, 255, 0.08), transparent 32%),
+                var(--void);
+            color: var(--text);
+            font-family: var(--mono);
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                repeating-linear-gradient(90deg, transparent 0 44px, rgba(0, 255, 65, 0.04) 45px, transparent 46px),
+                repeating-linear-gradient(180deg, rgba(0, 255, 65, 0.035) 0 1px, transparent 1px 32px);
+            opacity: 0.45;
+        }
+
+        .topbar,
+        main,
+        .page-messages {
+            position: relative;
+            z-index: 1;
+        }
+
+        .profile-shell {
+            display: grid;
+            gap: 24px;
+            max-width: 1180px;
+            margin: 0 auto;
+            padding: 44px clamp(18px, 4vw, 52px) 64px;
+        }
+
+        .profile-hero,
+        .dossier-card,
+        .profile-form-card {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .profile-hero::before,
+        .dossier-card::before,
+        .profile-form-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.14), transparent) top / 100% 1px no-repeat,
+                repeating-linear-gradient(180deg, transparent 0 8px, rgba(255, 255, 255, 0.018) 9px, transparent 10px);
+            pointer-events: none;
+        }
+
+        .profile-hero {
+            padding: clamp(24px, 4vw, 38px);
+        }
+
+        .eyebrow {
+            margin: 0;
+            color: var(--cyan);
+            font-size: 0.76rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        h1 {
+            margin: 8px 0 12px;
+            color: var(--green);
+            font-family: var(--mono);
+            font-size: clamp(2rem, 6vw, 4.2rem);
+            line-height: 1;
+            text-shadow: 0 0 20px rgba(0, 255, 65, 0.32);
+        }
+
+        .hero-text {
+            max-width: 720px;
+            color: var(--muted);
+            font-family: var(--mono);
+            line-height: 1.7;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: minmax(280px, 0.42fr) minmax(0, 1fr);
+            gap: 24px;
+            align-items: start;
+        }
+
+        .dossier-card,
+        .profile-form-card {
+            padding: 22px;
+        }
+
+        .dossier-header {
+            display: grid;
+            place-items: center;
+            gap: 12px;
+            margin-bottom: 22px;
+            text-align: center;
+        }
+
+        .agent-mark {
+            display: grid;
+            width: 82px;
+            height: 82px;
+            place-items: center;
+            border: 1px solid rgba(0, 255, 65, 0.3);
+            border-radius: 8px;
+            color: #050505;
+            background: var(--green);
+            font-size: 2.4rem;
+            font-weight: 900;
+            box-shadow: 0 0 26px rgba(0, 255, 65, 0.24);
+        }
+
+        h2 {
+            margin: 0 0 18px;
+            color: var(--green);
+            font-family: var(--mono);
+            font-size: 1.05rem;
+            text-transform: uppercase;
+        }
+
+        .dossier-list {
+            display: grid;
+            gap: 12px;
+        }
+
+        .dossier-row {
+            padding: 12px;
+            border: 1px solid rgba(0, 255, 65, 0.12);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.22);
+        }
+
+        .dossier-row span,
+        .dossier-row strong {
+            display: block;
+        }
+
+        .dossier-row span {
+            color: var(--muted);
+            font-size: 0.72rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .dossier-row strong {
+            margin-top: 5px;
+            color: var(--text);
+            overflow-wrap: anywhere;
+        }
+
+        .status-pending,
+        .status-verified,
+        .status-rejected {
+            display: inline-flex;
+            min-height: 26px;
+            align-items: center;
+            margin-top: 5px;
+            padding: 0 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .status-pending { color: var(--amber); border: 1px solid rgba(251, 191, 36, 0.25); background: rgba(251, 191, 36, 0.055); }
+        .status-verified { color: var(--green); border: 1px solid rgba(0, 255, 65, 0.3); background: rgba(0, 255, 65, 0.055); }
+        .status-rejected { color: var(--red); border: 1px solid rgba(255, 56, 96, 0.28); background: rgba(255, 56, 96, 0.055); }
+
+        .profile-form {
+            display: grid;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: grid;
+            gap: 8px;
+        }
+
+        .form-group label {
+            color: var(--muted);
+            font-size: 0.76rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            min-height: 46px;
+            border: 1px solid rgba(0, 255, 65, 0.22);
+            border-radius: 6px;
+            background: rgba(0, 0, 0, 0.38);
+            color: var(--text);
+            caret-color: var(--cyan);
+            font-family: var(--mono);
+            padding: 11px 12px;
+            outline: none;
+        }
+
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            border-color: var(--cyan);
+            box-shadow: 0 0 0 1px rgba(0, 255, 255, 0.18), 0 0 24px rgba(0, 255, 255, 0.16);
+        }
+
+        .form-group small {
+            color: var(--muted);
+        }
+
+        .error {
+            color: var(--red);
+            font-size: 0.78rem;
+        }
+
+        .btn-primary {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 46px;
+            border: 1px solid rgba(0, 255, 65, 0.24);
+            border-radius: 6px;
+            background: var(--green);
+            color: #050505;
+            cursor: pointer;
+            font-family: var(--mono);
+            font-weight: 900;
+            text-transform: uppercase;
+            box-shadow: 0 0 22px rgba(0, 255, 65, 0.22);
+        }
+
+        .btn-primary:hover {
+            animation: glitch 0.42s steps(2, end) infinite;
+            text-shadow: -2px 0 var(--cyan), 2px 0 var(--red);
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            35% { transform: translate(-1px, 1px); }
+            70% { transform: translate(1px, -1px); }
+        }
+
+        .page-messages p {
+            border: 1px solid var(--line);
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            color: var(--green);
+            font-family: var(--mono);
+        }
+
+        @media (max-width: 900px) {
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .profile-shell {
+                padding: 24px clamp(12px, 4vw, 24px) 32px;
+                gap: 16px;
+            }
+            
+            .profile-hero,
+            .dossier-card,
+            .profile-form-card {
+                padding: 16px;
+            }
+            
+            .eyebrow {
+                font-size: 0.65rem !important;
+            }
+            
+            h1 {
+                font-size: clamp(1.5rem, 5vw, 2.5rem) !important;
+                margin: 6px 0 12px;
+            }
+            
+            .hero-text {
+                font-size: 0.9rem !important;
+                line-height: 1.6;
+            }
+            
+            .dossier-header {
+                gap: 8px;
+                margin-bottom: 16px;
+            }
+            
+            .agent-mark {
+                width: 60px;
+                height: 60px;
+                font-size: 1.8rem;
+            }
+            
+            h2 {
+                font-size: 0.9rem !important;
+                margin: 0 0 12px;
+            }
+            
+            .dossier-list {
+                gap: 8px;
+            }
+            
+            .dossier-row {
+                padding: 10px;
+            }
+            
+            .dossier-row span,
+            .dossier-row strong {
+                font-size: 0.75rem !important;
+            }
+            
+            .status-pending,
+            .status-verified,
+            .status-rejected {
+                font-size: 0.65rem !important;
+                padding: 0 8px;
+                min-height: 22px;
+            }
+            
+            .form-group {
+                gap: 6px;
+            }
+            
+            .form-group label {
+                font-size: 0.65rem !important;
+            }
+            
+            .form-group input,
+            .form-group textarea {
+                min-height: 40px;
+                padding: 10px 10px;
+                font-size: 0.85rem !important;
+            }
+            
+            .form-group textarea {
+                min-height: 100px;
+            }
+            
+            .form-group small {
+                font-size: 0.75rem !important;
+            }
+            
+            .error {
+                font-size: 0.7rem !important;
+            }
+            
+            .btn-primary {
+                min-height: 40px;
+                padding: 0 16px;
+                font-size: 0.85rem !important;
+            }
+            
+            .nav-links a {
+                font-size: 0.8rem !important;
+                margin: 0 4px;
+            }
+            
+            .brand {
+                font-size: 0.9rem !important;
+            }
+            
+            .brand-mark {
+                width: 24px;
+                height: 24px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .profile-shell {
+                padding: 16px 8px 24px 8px;
+            }
+            
+            h1 {
+                font-size: 1.3rem !important;
+            }
+            
+            .hero-text {
+                font-size: 0.8rem !important;
+            }
+            
+            .dossier-card,
+            .profile-form-card {
+                padding: 12px;
+            }
+            
+            .agent-mark {
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
+            }
+            
+            h2 {
+                font-size: 0.8rem !important;
+            }
+            
+            .dossier-row {
+                padding: 8px;
+            }
+            
+            .form-group input,
+            .form-group textarea {
+                min-height: 36px;
+                padding: 8px 8px;
+                font-size: 0.8rem !important;
+            }
+            
+            .form-group textarea {
+                min-height: 80px;
+            }
+            
+            .btn-primary {
+                min-height: 36px;
+                padding: 0 12px;
+                font-size: 0.8rem !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="{% url 'home' %}" aria-label="Learnify home">
+            <span class="brand-mark">L</span>
+            <span>Learnify</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+            <a href="{% url 'home' %}#courses">Courses</a>
+            <a href="{% url 'dashboard' %}">Dashboard</a>
+            <a href="{% url 'performance_report' %}">Reports</a>
+            {% if user.is_staff %}
+                <a href="{% url 'admin_user_verification' %}">User Verification</a>
+            {% endif %}
+            <a href="{% url 'admin_access' %}">Admin</a>
+            <span class="nav-user">{{ user.username }}</span>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="nav-button" type="submit">Logout</button>
+            </form>
+        </nav>
+    </header>
+
+    {% if messages %}
+        <div class="page-messages" role="status" aria-live="polite">
+            {% for message in messages %}
+                <p class="{{ message.tags }}">{{ message }}</p>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <main class="profile-shell">
+        <section class="profile-hero">
+            <p class="eyebrow">AGENT_DOSSIER</p>
+            <h1>Profile Console</h1>
+            <p class="hero-text">Maintain your operator profile, verification document, and personal metadata inside the Learnify access grid.</p>
+        </section>
+
+        <section class="profile-grid">
+            <aside class="dossier-card">
+                <div class="dossier-header">
+                    <div class="agent-mark">{{ user.username|first|upper }}</div>
+                    <h2>Identity Snapshot</h2>
+                </div>
+                <div class="dossier-list">
+                    <div class="dossier-row">
+                        <span>Username</span>
+                        <strong>{{ user.username }}</strong>
+                    </div>
+                    <div class="dossier-row">
+                        <span>Email</span>
+                        <strong>{{ user.email }}</strong>
+                    </div>
+                    <div class="dossier-row">
+                        <span>Role</span>
+                        <strong>{{ profile.get_role_display|title }}</strong>
+                    </div>
+                    <div class="dossier-row">
+                        <span>Verification Status</span>
+                        <span class="status-{{ profile.verification_status }}">
+                            {{ profile.get_verification_status_display|title }}
+                        </span>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="profile-form-card">
+                <h2>Update Dossier</h2>
+                <form method="post" enctype="multipart/form-data" class="profile-form">
+                    {% csrf_token %}
+
+                    <div class="form-group">
+                        <label for="{{ form.phone_number.id_for_label }}">Phone Number</label>
+                        {{ form.phone_number }}
+                        {% if form.phone_number.errors %}
+                            <div class="error">{{ form.phone_number.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.bio.id_for_label }}">Bio</label>
+                        {{ form.bio }}
+                        {% if form.bio.errors %}
+                            <div class="error">{{ form.bio.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.date_of_birth.id_for_label }}">Date of Birth</label>
+                        {{ form.date_of_birth }}
+                        {% if form.date_of_birth.errors %}
+                            <div class="error">{{ form.date_of_birth.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="form-group">
+                        <label for="{{ form.verification_document.id_for_label }}">Verification Document</label>
+                        {{ form.verification_document }}
+                        {% if form.verification_document.errors %}
+                            <div class="error">{{ form.verification_document.errors }}</div>
+                        {% endif %}
+                        <small>Upload a document for identity verification (PDF, JPG, PNG)</small>
+                    </div>
+
+                    <button type="submit" class="btn-primary">SYNC_PROFILE</button>
+                </form>
+            </section>
+        </section>
+    </main>
+</body>
+</html>
