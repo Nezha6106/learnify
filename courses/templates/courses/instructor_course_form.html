@@ -32,17 +32,6 @@
         font-family: var(--mono);
     }
 
-    .cyber-topbar,
-    .cyber-panel,
-    .cyber-actions {
-        background: var(--glass);
-        backdrop-filter: blur(16px);
-        -webkit-backdrop-filter: blur(16px);
-        border: 1px solid var(--line);
-        border-radius: 8px;
-        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-    }
-
     .cyber-topbar {
         display: flex;
         justify-content: space-between;
@@ -50,12 +39,17 @@
         gap: 18px;
         margin-bottom: 24px;
         padding: 22px;
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
         position: relative;
         overflow: hidden;
     }
 
-    .cyber-topbar::before,
-    .cyber-panel::before {
+    .cyber-topbar::before {
         content: "";
         position: absolute;
         inset: 0;
@@ -85,22 +79,37 @@
         font-size: 0.82rem;
     }
 
+    /* Main 2-column grid */
     .cyber-grid {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(320px, 0.38fr);
-        gap: 22px;
+        grid-template-columns: 1fr 360px;
+        gap: 24px;
         align-items: start;
     }
 
     .cyber-stack {
         display: grid;
-        gap: 22px;
+        gap: 24px;
     }
 
     .cyber-panel {
         position: relative;
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
         padding: 22px;
         overflow: hidden;
+    }
+
+    .cyber-panel::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.14), transparent) top / 100% 1px no-repeat;
+        pointer-events: none;
     }
 
     .cyber-panel h3 {
@@ -121,9 +130,10 @@
         font-size: 0.72rem;
     }
 
+    /* 2-column field grid inside panels */
     .field-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
+        grid-template-columns: repeat(2, 1fr);
         gap: 16px;
     }
 
@@ -175,6 +185,7 @@
         padding: 11px 13px 11px 32px;
         outline: none;
         transition: border-color 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        box-sizing: border-box;
     }
 
     .cyber-course-form textarea {
@@ -242,6 +253,12 @@
         display: grid;
         gap: 12px;
         padding: 16px;
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
     }
 
     .cyber-btn {
@@ -260,6 +277,7 @@
         text-decoration: none;
         overflow: hidden;
         box-shadow: 0 0 22px rgba(0, 255, 65, 0.24);
+        width: 100%;
     }
 
     .cyber-btn.secondary {
@@ -281,7 +299,9 @@
     }
 
     @media (max-width: 1100px) {
-        .cyber-grid,
+        .cyber-grid {
+            grid-template-columns: 1fr;
+        }
         .field-grid {
             grid-template-columns: 1fr;
         }
@@ -297,6 +317,7 @@
 {% endblock %}
 
 {% block content %}
+<!-- Page Header -->
 <div class="cyber-topbar">
     <div>
         <div class="cyber-kicker">COURSE_CONSTRUCT_PROTOCOL</div>
@@ -305,15 +326,17 @@
             Home / <a href="{% url 'instructor_course_list' %}" class="text-decoration-none">Courses</a> / {{ action }}
         </div>
     </div>
-    <a href="{% url 'instructor_course_list' %}" class="cyber-btn secondary">
+    <a href="{% url 'instructor_course_list' %}" class="cyber-btn secondary" style="width: auto; white-space: nowrap;">
         BACKTRACE_LIST
     </a>
 </div>
 
+<!-- 2-Column Layout: Left = Basic Info + Mission Content, Right = Deployment -->
 <form method="post" enctype="multipart/form-data" action="{{ action_url }}" class="cyber-course-form">
     {% csrf_token %}
 
     <div class="cyber-grid">
+        <!-- LEFT COLUMN: Basic Information + Mission Content -->
         <div class="cyber-stack">
             <section class="cyber-panel">
                 <h3><span>NODE_01</span> Basic Information</h3>
@@ -392,6 +415,7 @@
             </section>
         </div>
 
+        <!-- RIGHT COLUMN: Deployment Settings -->
         <aside class="cyber-stack">
             <section class="cyber-panel">
                 <h3><span>NODE_03</span> Deployment Settings</h3>

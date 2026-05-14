@@ -126,11 +126,11 @@
         padding: 20px;
     }
 
-    .filter-grid {
-        display: grid;
-        grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(150px, 0.8fr)) auto;
-        gap: 14px;
-        align-items: end;
+    .filter-row {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        align-items: flex-end;
     }
 
     .terminal-field {
@@ -140,6 +140,8 @@
         font-size: 0.72rem;
         font-weight: 900;
         text-transform: uppercase;
+        flex: 1;
+        min-width: 160px;
     }
 
     .terminal-control {
@@ -357,20 +359,26 @@
     }
 
     @media (max-width: 1100px) {
-        .filter-grid {
-            grid-template-columns: 1fr 1fr;
+        .filter-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .terminal-field {
+            min-width: unset;
         }
     }
 
     @media (max-width: 760px) {
-        .cyber-topbar,
-        .filter-grid {
-            align-items: stretch;
-            grid-template-columns: 1fr;
-        }
-
         .cyber-topbar {
             flex-direction: column;
+            align-items: stretch;
+        }
+        .filter-row {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .terminal-field {
+            min-width: unset;
         }
     }
 
@@ -380,263 +388,61 @@
             margin-bottom: 16px;
             gap: 12px;
         }
-        
-        .cyber-kicker {
-            font-size: 0.65rem !important;
-        }
-        
-        .cyber-topbar h1 {
-            font-size: clamp(1.25rem, 5vw, 2rem) !important;
-            margin: 4px 0 4px;
-        }
-        
-        .topbar-breadcrumb {
-            font-size: 0.7rem !important;
-        }
-        
-        .cyber-btn {
-            min-height: 36px !important;
-            padding: 0 12px !important;
-            font-size: 0.8rem !important;
-        }
-        
-        .filter-grid {
-            gap: 12px;
-            padding: 16px;
-        }
-        
-        .terminal-field {
-            margin-bottom: 8px;
-        }
-        
-        .terminal-field label {
-            font-size: 0.65rem !important;
-            margin-bottom: 4px;
-        }
-        
-        .terminal-control::before {
-            left: 10px;
-            font-size: 0.75rem;
-        }
-        
-        .terminal-control input,
-        .terminal-control select {
-            min-height: 38px;
-            padding: 8px 8px 8px 28px;
-            font-size: 0.8rem !important;
-        }
-        
-        .clear-link {
-            font-size: 0.7rem !important;
-            margin-top: 8px;
-        }
-        
-        .directory-table {
-            font-size: 0.8rem !important;
-        }
-        
-        .directory-table thead {
-            display: none;
-        }
-        
-        .directory-table tbody {
-            display: block;
-        }
-        
-        .directory-table tr {
-            display: flex;
-            flex-direction: column;
-            margin-bottom: 16px;
-            padding: 16px;
-            background: var(--glass);
-            backdrop-filter: blur(16px);
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.37);
-        }
-        
-        .directory-table td {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(0, 255, 65, 0.1);
-        }
-        
-        .directory-table td:last-child {
-            border-bottom: none;
-        }
-        
-        .directory-table td::before {
-            content: attr(data-label);
-            font-weight: bold;
-            color: var(--cyan);
-            min-width: 80px;
-        }
-        
-        .course-thumb {
-            width: 40px;
-            height: 28px;
-        }
-        
-        .course-title {
-            font-weight: 900;
-            font-size: 0.9rem;
-        }
-        
-        .course-sub {
-            font-size: 0.7rem;
-            margin-top: 2px;
-        }
-        
-        .cyber-badge {
-            font-size: 0.65rem;
-            padding: 0 8px;
-            min-height: 22px;
-        }
-        
-        .badge-published,
-        .badge-draft {
-            font-size: 0.65rem;
-            padding: 0 8px;
-            min-height: 22px;
-        }
-        
-        .price-free {
-            font-size: 0.75rem;
-            font-weight: 900;
-        }
-        
-        .btn-icon {
-            width: 28px;
-            height: 28px;
-        }
-        
-        .empty-directory {
-            padding: 24px 12px;
-        }
-        
-        .empty-directory strong {
-            font-size: 0.9rem;
-        }
-        
-        .empty-directory p {
-            font-size: 0.8rem;
-        }
-        
-        .cyber-pagination {
-            margin-top: 16px;
-            padding: 8px;
-        }
-        
-        .pagination {
-            gap: 6px;
-        }
-        
-        .page-item.active .page-link {
-            min-width: 36px;
-            height: 36px;
-            font-size: 0.8rem;
-        }
-        
-        .page-link {
-            min-width: 36px;
-            height: 36px;
-            font-size: 0.8rem;
-        }
-        
-        .nav-links a {
-            font-size: 0.8rem !important;
-            margin: 0 4px;
-        }
-        
-        .brand {
-            font-size: 0.9rem !important;
-        }
-        
-        .brand-mark {
-            width: 24px;
-            height: 24px;
-        }
+        .cyber-kicker { font-size: 0.65rem !important; }
+        .cyber-topbar h1 { font-size: clamp(1.25rem, 5vw, 2rem) !important; margin: 4px 0 4px; }
+        .topbar-breadcrumb { font-size: 0.7rem !important; }
+        .cyber-btn { min-height: 36px !important; padding: 0 12px !important; font-size: 0.8rem !important; }
+        .filter-row { gap: 12px; padding: 16px; }
+        .terminal-field { margin-bottom: 8px; }
+        .terminal-field label { font-size: 0.65rem !important; margin-bottom: 4px; }
+        .terminal-control::before { left: 10px; font-size: 0.75rem; }
+        .terminal-control input, .terminal-control select { min-height: 38px; padding: 8px 8px 8px 28px; font-size: 0.8rem !important; }
+        .clear-link { font-size: 0.7rem !important; margin-top: 8px; }
+        .directory-table { font-size: 0.8rem !important; }
+        .directory-table thead { display: none; }
+        .directory-table tbody { display: block; }
+        .directory-table tr { display: flex; flex-direction: column; margin-bottom: 16px; padding: 16px; background: var(--glass); backdrop-filter: blur(16px); border: 1px solid var(--line); border-radius: 8px; box-shadow: 0 8px 32px rgba(0,0,0,0.37); }
+        .directory-table td { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(0, 255, 65, 0.1); }
+        .directory-table td:last-child { border-bottom: none; }
+        .directory-table td::before { content: attr(data-label); font-weight: bold; color: var(--cyan); min-width: 80px; }
+        .course-thumb { width: 40px; height: 28px; }
+        .course-title { font-weight: 900; font-size: 0.9rem; }
+        .course-sub { font-size: 0.7rem; margin-top: 2px; }
+        .cyber-badge { font-size: 0.65rem; padding: 0 8px; min-height: 22px; }
+        .badge-published, .badge-draft { font-size: 0.65rem; padding: 0 8px; min-height: 22px; }
+        .price-free { font-size: 0.75rem; font-weight: 900; }
+        .btn-icon { width: 28px; height: 28px; }
+        .empty-directory { padding: 24px 12px; }
+        .empty-directory strong { font-size: 0.9rem; }
+        .empty-directory p { font-size: 0.8rem; }
+        .cyber-pagination { margin-top: 16px; padding: 8px; }
+        .pagination { gap: 6px; }
+        .page-item.active .page-link, .page-link { min-width: 36px; height: 36px; font-size: 0.8rem; }
     }
 
     @media (max-width: 320px) {
-        .cyber-topbar {
-            padding: 12px;
-        }
-        
-        .cyber-kicker {
-            font-size: 0.6rem !important;
-        }
-        
-        .cyber-topbar h1 {
-            font-size: 1.2rem !important;
-        }
-        
-        .topbar-breadcrumb {
-            font-size: 0.65rem !important;
-        }
-        
-        .filter-grid {
-            padding: 12px;
-        }
-        
-        .terminal-control input,
-        .terminal-control select {
-            min-height: 36px;
-            padding: 6px 6px 6px 24px;
-        }
-        
-        .directory-table td::before {
-            min-width: 70px;
-            font-size: 0.75rem;
-        }
-        
-        .course-thumb {
-            width: 32px;
-            height: 22px;
-        }
-        
-        .course-title {
-            font-size: 0.8rem;
-        }
-        
-        .course-sub {
-            font-size: 0.65rem;
-        }
-        
-        .cyber-btn {
-            min-height: 32px !important;
-            padding: 0 10px !important;
-            font-size: 0.75rem !important;
-        }
-        
-        .clear-link {
-            font-size: 0.65rem !important;
-        }
-        
-        .empty-directory strong {
-            font-size: 0.8rem;
-        }
-        
-        .empty-directory p {
-            font-size: 0.7rem;
-        }
-        
-        .cyber-pagination {
-            margin-top: 12px;
-        }
-        
-        .page-item.active .page-link,
-        .page-link {
-            min-width: 32px;
-            height: 32px;
-            font-size: 0.7rem;
-        }
+        .cyber-topbar { padding: 12px; }
+        .cyber-kicker { font-size: 0.6rem !important; }
+        .cyber-topbar h1 { font-size: 1.2rem !important; }
+        .topbar-breadcrumb { font-size: 0.65rem !important; }
+        .filter-row { padding: 12px; }
+        .terminal-control input, .terminal-control select { min-height: 36px; padding: 6px 6px 6px 24px; }
+        .directory-table td::before { min-width: 70px; font-size: 0.75rem; }
+        .course-thumb { width: 32px; height: 22px; }
+        .course-title { font-size: 0.8rem; }
+        .course-sub { font-size: 0.65rem; }
+        .cyber-btn { min-height: 32px !important; padding: 0 10px !important; font-size: 0.75rem !important; }
+        .clear-link { font-size: 0.65rem !important; }
+        .empty-directory strong { font-size: 0.8rem; }
+        .empty-directory p { font-size: 0.7rem; }
+        .cyber-pagination { margin-top: 12px; }
+        .page-item.active .page-link, .page-link { min-width: 32px; height: 32px; font-size: 0.7rem; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
+<!-- Page Header -->
 <div class="cyber-topbar">
     <div>
         <div class="cyber-kicker">SERVER_DIRECTORY</div>
@@ -648,17 +454,17 @@
     </a>
 </div>
 
+<!-- Filter Bar -->
 <section class="cyber-filter">
-    <form method="get" class="filter-grid">
-        <label class="terminal-field">
-            Search
+    <form method="get" class="filter-row">
+        <div class="terminal-field">
+            <label>Search</label>
             <span class="terminal-control">
                 <input type="text" name="q" placeholder="SCAN_DIRECTORY" value="{{ search_query }}">
             </span>
-        </label>
-
-        <label class="terminal-field">
-            Category
+        </div>
+        <div class="terminal-field">
+            <label>Category</label>
             <span class="terminal-control">
                 <select name="category">
                     <option value="">ALL_CATEGORIES</option>
@@ -667,10 +473,9 @@
                     {% endfor %}
                 </select>
             </span>
-        </label>
-
-        <label class="terminal-field">
-            Level
+        </div>
+        <div class="terminal-field">
+            <label>Level</label>
             <span class="terminal-control">
                 <select name="level">
                     <option value="">ALL_LEVELS</option>
@@ -679,10 +484,9 @@
                     {% endfor %}
                 </select>
             </span>
-        </label>
-
-        <label class="terminal-field">
-            Status
+        </div>
+        <div class="terminal-field">
+            <label>Status</label>
             <span class="terminal-control">
                 <select name="status">
                     <option value="">ALL_STATUS</option>
@@ -690,15 +494,18 @@
                     <option value="draft" {% if selected_status == 'draft' %}selected{% endif %}>DRAFT</option>
                 </select>
             </span>
-        </label>
-
-        <button type="submit" class="cyber-btn">FILTER</button>
+        </div>
+        <div class="terminal-field" style="flex: 0 0 auto;">
+            <label>&nbsp;</label>
+            <button type="submit" class="cyber-btn" style="width: 100%;">FILTER</button>
+        </div>
     </form>
     {% if search_query or selected_category or selected_level or selected_status %}
     <a href="{% url 'instructor_course_list' %}" class="clear-link">CLEAR_FILTERS</a>
     {% endif %}
 </section>
 
+<!-- Course Directory Table -->
 <section class="directory-grid">
     <div class="table-responsive">
         <table class="directory-table">
@@ -718,7 +525,7 @@
             <tbody>
                 {% for course in courses %}
                 <tr>
-                    <td>
+                    <td data-label="Packet">
                         <span class="course-thumb">
                             {% if course.image %}
                                 <img src="{{ course.image.url }}" alt="">
@@ -727,33 +534,33 @@
                             {% endif %}
                         </span>
                     </td>
-                    <td>
+                    <td data-label="Course Node">
                         <div class="course-title">{{ course.title }}</div>
                         <div class="course-sub">{{ course.duration }}</div>
                     </td>
-                    <td><span class="cyber-badge">{{ course.category }}</span></td>
-                    <td>
+                    <td data-label="Category"><span class="cyber-badge">{{ course.category }}</span></td>
+                    <td data-label="Level">
                         <span class="cyber-badge {% if course.level == 'Beginner' %}level-beginner{% elif course.level == 'Intermediate' %}level-intermediate{% else %}level-advanced{% endif %}">
                             {{ course.level }}
                         </span>
                     </td>
-                    <td class="text-center">
+                    <td data-label="Price" class="text-center">
                         {% if course.price > 0 %}
                             ${{ course.price }}
                         {% else %}
                             <span class="price-free">FREE</span>
                         {% endif %}
                     </td>
-                    <td class="text-center">
+                    <td data-label="Status" class="text-center">
                         {% if course.is_published %}
                             <span class="badge-published">Published</span>
                         {% else %}
                             <span class="badge-draft">Draft</span>
                         {% endif %}
                     </td>
-                    <td class="text-center">{{ course.enrollments.count }}</td>
-                    <td class="text-center">{{ course.quiz_questions.count }}</td>
-                    <td class="text-center">
+                    <td data-label="Enrolled" class="text-center">{{ course.enrollments.count }}</td>
+                    <td data-label="Questions" class="text-center">{{ course.quiz_questions.count }}</td>
+                    <td data-label="Actions" class="text-center">
                         <a href="{% url 'instructor_course_update' course.slug %}" class="btn-icon" title="Edit">
                             <i class="bi bi-pencil"></i>
                         </a>
@@ -781,6 +588,7 @@
     </div>
 </section>
 
+<!-- Pagination -->
 {% if is_paginated %}
 <nav class="cyber-pagination">
     <ul class="pagination justify-content-center">
@@ -790,13 +598,13 @@
         </li>
         {% endif %}
         {% for num in page_obj.paginator.page_range %}
-            {% if page_obj.number == num %}
-            <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_level %}&level={{ selected_level }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">{{ num }}</a>
-            </li>
-            {% endif %}
+        {% if page_obj.number == num %}
+        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
+        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+        <li class="page-item">
+            <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_category %}&category={{ selected_category }}{% endif %}{% if selected_level %}&level={{ selected_level }}{% endif %}{% if selected_status %}&status={{ selected_status }}{% endif %}">{{ num }}</a>
+        </li>
+        {% endif %}
         {% endfor %}
         {% if page_obj.has_next %}
         <li class="page-item">
