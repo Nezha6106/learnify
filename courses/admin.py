@@ -1,6 +1,10 @@
 from django.contrib import admin
 
-from .models import Announcement, Course, CourseMaterial, Enrollment, Lesson, LiveSession, QuizAttempt, QuizQuestion, UserProfile, QuizSession, StudentAnalytics
+from .models import (
+    Announcement, Course, CourseMaterial, Enrollment, Lesson,
+    LiveSession, Quiz, Question, QuizAttempt, QuizQuestion, QuizSession, UserProfile,
+    StudentAnalytics, UserProgress, ProjectSubmission
+)
 
 
 class LessonInline(admin.TabularInline):
@@ -20,6 +24,11 @@ class AnnouncementInline(admin.TabularInline):
 
 class QuizQuestionInline(admin.TabularInline):
     model = QuizQuestion
+    extra = 1
+
+
+class QuestionInline(admin.TabularInline):
+    model = Question
     extra = 1
 
 
@@ -67,10 +76,25 @@ class LiveSessionAdmin(admin.ModelAdmin):
 
 @admin.register(QuizAttempt)
 class QuizAttemptAdmin(admin.ModelAdmin):
-    list_display = ("full_name", "email", "course", "user", "score", "total_questions", "submitted_at")
-    list_filter = ("course", "submitted_at")
+    list_display = ("full_name", "email", "course", "quiz", "user", "score", "total_questions", "passed", "submitted_at")
+    list_filter = ("course", "quiz", "passed", "submitted_at")
     search_fields = ("full_name", "email", "course__title")
     readonly_fields = ("submitted_at",)
+
+
+@admin.register(Quiz)
+class QuizAdmin(admin.ModelAdmin):
+    list_display = ("title", "course", "pass_percentage", "order", "is_active")
+    list_filter = ("course", "is_active")
+    search_fields = ("title", "course__title", "description")
+    inlines = [QuestionInline]
+
+
+@admin.register(Question)
+class QuestionAdmin(admin.ModelAdmin):
+    list_display = ("question_text", "quiz", "correct_answer", "order")
+    list_filter = ("quiz__course", "quiz")
+    search_fields = ("question_text", "quiz__title", "quiz__course__title")
 
 
 @admin.register(UserProfile)
@@ -97,3 +121,19 @@ class StudentAnalyticsAdmin(admin.ModelAdmin):
     search_fields = ("user__username", "user__email")
     readonly_fields = ("created_at", "last_activity")
     fields = ("user", "average_quiz_score", "total_quiz_attempts", "courses_completed", "total_hours_spent", "created_at", "last_activity")
+
+
+@admin.register(UserProgress)
+class UserProgressAdmin(admin.ModelAdmin):
+    list_display = ("user", "course", "completion_percentage", "completed_lessons_count", "quizzes_passed", "is_completed")
+    list_filter = ("course", "is_completed")
+    search_fields = ("user__username", "course__title")
+    readonly_fields = ("started_at", "updated_at")
+
+
+@admin.register(ProjectSubmission)
+class ProjectSubmissionAdmin(admin.ModelAdmin):
+    list_display = ("user", "course", "github_url", "is_approved", "submitted_at")
+    list_filter = ("course", "is_approved")
+    search_fields = ("user__username", "course__title", "github_url")
+    readonly_fields = ("submitted_at",)

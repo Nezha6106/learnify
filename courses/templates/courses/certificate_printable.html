@@ -1,0 +1,152 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Certificate of Completion | Learnify</title>
+    <style>
+        @media print {
+            body { background: white !important; color: black !important; }
+            .no-print { display: none !important; }
+        }
+        body {
+            background: #050505;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+        .certificate {
+            width: 800px;
+            height: 566px;
+            background: linear-gradient(135deg, #f5f0e8, #fffdf5);
+            border: 8px double #8B7355;
+            border-radius: 12px;
+            padding: 40px 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .certificate::before {
+            content: "";
+            position: absolute;
+            inset: 12px;
+            border: 1px solid #d4c5a9;
+            border-radius: 6px;
+            pointer-events: none;
+        }
+        .cert-header {
+            text-align: center;
+            width: 100%;
+        }
+        .cert-header h1 {
+            font-size: 2.4rem;
+            color: #3a2e1f;
+            margin: 0 0 4px;
+            letter-spacing: 0.1em;
+            font-family: 'Georgia', serif;
+        }
+        .cert-header .subtitle {
+            font-size: 1rem;
+            color: #6b5a3e;
+            text-transform: uppercase;
+            letter-spacing: 0.3em;
+            font-weight: 600;
+        }
+        .cert-body {
+            text-align: center;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .cert-presented {
+            font-size: 1.1rem;
+            color: #5a4a32;
+            margin-bottom: 12px;
+        }
+        .cert-student-name {
+            font-size: 2.8rem;
+            font-weight: bold;
+            color: #2a1f14;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 8px;
+            font-family: 'Georgia', serif;
+            border-bottom: 2px solid #8B7355;
+            display: inline-block;
+            padding-bottom: 4px;
+        }
+        .cert-course {
+            font-size: 1.3rem;
+            color: #4a3a24;
+            margin-bottom: 10px;
+            font-style: italic;
+        }
+        .cert-grade-score {
+            font-size: 1rem;
+            color: #5a4a32;
+            margin-bottom: 6px;
+        }
+        .cert-date {
+            font-size: 0.95rem;
+            color: #6b5a3e;
+        }
+        .cert-footer {
+            text-align: center;
+            width: 100%;
+        }
+        .cert-signature-line {
+            border-top: 1px solid #8B7355;
+            width: 220px;
+            margin: 0 auto 6px;
+        }
+        .cert-signature-name {
+            font-size: 0.95rem;
+            color: #5a4a32;
+            font-weight: 600;
+        }
+        .cert-seal {
+            margin-top: 10px;
+            font-size: 2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="certificate">
+        <div class="cert-header">
+            <div class="subtitle">Learnify Academy</div>
+            <h1>Certificate of Completion</h1>
+        </div>
+        <div class="cert-body">
+            <p class="cert-presented">This certificate is proudly presented to</p>
+            <div class="cert-student-name">{{ certificate.student_name }}</div>
+            <p class="cert-course">For the successful completion of</p>
+            <p class="cert-course" style="font-size:1.5rem;font-style:normal;font-weight:bold;color:#2a1f14;">{{ certificate.course_title }}</p>
+            <p class="cert-grade-score">Grade: {{ certificate.grade }} &nbsp;|&nbsp; Score: {{ certificate.quiz_score }} ({{ certificate.percentage }})</p>
+            <p class="cert-date">Date: {{ certificate.date }}</p>
+        </div>
+        <div class="cert-footer">
+            <div class="cert-signature-line"></div>
+            <p class="cert-signature-name">{{ certificate.signature_line }}</p>
+            <p class="cert-signature-name" style="font-size:0.8rem;color:#8B7355;">Director of Academic Affairs</p>
+            <div class="cert-seal">🛡️</div>
+        </div>
+    </div>
+
+    <div class="no-print" style="position:fixed;top:16px;right:16px;display:flex;gap:10px;z-index:10;">
+        <button onclick="window.print()" style="padding:10px 20px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:0.9rem;">
+            🖨️ Print / Save PDF
+        </button>
+        <button onclick="window.close()" style="padding:10px 20px;border-radius:6px;border:1px solid #ccc;background:#fff;cursor:pointer;font-size:0.9rem;">
+            ✕ Close
+        </button>
+    </div>
+</body>
+</html>

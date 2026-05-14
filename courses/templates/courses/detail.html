@@ -665,23 +665,24 @@
             <span class="brand-mark">L</span>
             <span>Learnify</span>
         </a>
-        <nav class="nav-links" aria-label="Primary">
-            <a href="{% url 'home' %}#courses">Courses</a>
-            <a href="{% url 'performance_report' %}">Reports</a>
-            <a href="{% url 'admin_access' %}">Admin</a>
-            {% if user.is_authenticated %}
-                <a href="{% url 'dashboard' %}">Dashboard</a>
-                <a href="{% url 'user_profile' %}">Profile</a>
-                <span class="nav-user">{{ user.username }}</span>
-                <form method="post" action="{% url 'logout' %}">
-                    {% csrf_token %}
-                    <button class="nav-button" type="submit">Logout</button>
-                </form>
-            {% else %}
-                <a href="{% url 'login' %}">Sign in</a>
-                <a class="nav-cta" href="{% url 'signup' %}">Create account</a>
-            {% endif %}
-        </nav>
+<nav class="nav-links" aria-label="Primary">
+             <a href="{% url 'home' %}#courses">Courses</a>
+             {% if user.is_authenticated %}
+                 <a href="{% url 'dashboard' %}">Dashboard</a>
+                 <a href="{% url 'user_profile' %}">Profile</a>
+                 {% if user.is_staff or user.is_superuser %}
+                     <a href="{% url 'instructor_dashboard' %}">⚙️ Instructor Panel</a>
+                 {% endif %}
+                 <span class="nav-user">{{ user.username }}</span>
+                 <form method="post" action="{% url 'logout' %}">
+                     {% csrf_token %}
+                     <button class="nav-button" type="submit">Logout</button>
+                 </form>
+             {% else %}
+                 <a href="{% url 'login' %}">Sign in</a>
+                 <a class="nav-cta" href="{% url 'signup' %}">Create account</a>
+             {% endif %}
+         </nav>
     </header>
 
     <main>
@@ -744,7 +745,7 @@
                                     <p>{{ material.material_type }}</p>
                                 </div>
                                 {% if is_enrolled %}
-                                    <a class="card-action" href="{{ material.material_url }}" target="_blank" rel="noopener">OPEN</a>
+                                    <a class="card-action" href="{{ material.access_url }}" target="_blank" rel="noopener">OPEN</a>
                                 {% else %}
                                     <small>Enroll to open</small>
                                 {% endif %}

@@ -1,0 +1,22 @@
+{% extends "courses/instructor_base.html" %}
+{% block title %}Confirm Delete Material{% endblock %}
+{% block content %}
+<div class="confirm-shell">
+    <div class="confirm-panel">
+        <span class="confirm-icon">⚠️</span>
+        <h2>Delete Material "{{ object.title }}"?</h2>
+        <p>This action cannot be undone.</p>
+        <div class="confirm-details">
+            <p><span>Course:</span> <strong>{{ course.title }}</strong></p>
+            <p><span>Material:</span> <strong>{{ object.title }}</strong></p>
+        </div>
+        <div class="form-actions">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="cyber-btn danger">DELETE</button>
+            </form>
+            <a href="{% url 'manage_course_components' slug=course.slug %}" class="cyber-btn secondary">CANCEL</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

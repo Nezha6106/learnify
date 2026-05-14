@@ -1,0 +1,402 @@
+{% extends "courses/instructor_base.html" %}
+
+{% block title %}Student Report Card{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --void: #050505;
+        --glass: rgba(10, 15, 12, 0.45);
+        --green: #00FF41;
+        --cyan: #00FFFF;
+        --purple: #a855f7;
+        --red: #ff3860;
+        --amber: #fbbf24;
+        --text: #e7fff0;
+        --muted: #6f7f78;
+        --line: rgba(0, 255, 65, 0.15);
+        --mono: "Fira Code", "Space Mono", "Consolas", monospace;
+    }
+
+    .report-shell {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 44px clamp(18px, 4vw, 52px) 64px;
+    }
+
+    .report-header {
+        padding: clamp(24px, 4vw, 38px);
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        margin-bottom: 24px;
+    }
+
+    .report-header h1 {
+        color: var(--green);
+        font-family: var(--mono);
+        font-size: clamp(2rem, 5vw, 3.4rem);
+        margin: 8px 0 22px;
+        text-shadow: 0 0 20px rgba(0, 255, 65, 0.32);
+    }
+
+    .report-header p {
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.7;
+    }
+
+    .student-info-bar {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+        align-items: center;
+        padding: 16px 22px;
+        background: rgba(0, 0, 0, 0.22);
+        border-radius: 6px;
+        margin-bottom: 24px;
+    }
+
+    .student-info-bar .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .student-info-bar .info-label {
+        color: var(--muted);
+        font-size: 0.72rem;
+        text-transform: uppercase;
+        font-weight: 900;
+    }
+
+    .student-info-bar .info-value {
+        color: var(--text);
+        font-weight: 900;
+        font-size: 1rem;
+    }
+
+    .grade-overview {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .grade-card {
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 22px;
+        text-align: center;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .grade-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent) top / 100% 1px no-repeat;
+    }
+
+    .grade-card .grade-label {
+        color: var(--muted);
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+    }
+
+    .grade-card .grade-value {
+        color: var(--green);
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        font-weight: 900;
+        text-shadow: 0 0 18px rgba(0, 255, 65, 0.3);
+    }
+
+    .grade-card .grade-sub {
+        color: var(--muted);
+        font-size: 0.8rem;
+        margin-top: 8px;
+    }
+
+    .course-grade-section {
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 22px;
+        margin-bottom: 24px;
+    }
+
+    .course-grade-section h3 {
+        color: var(--green);
+        font-size: 1.05rem;
+        margin: 0 0 18px;
+        text-transform: uppercase;
+    }
+
+    .grade-row {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 80px 60px;
+        gap: 12px;
+        align-items: center;
+        padding: 14px 0;
+        border-bottom: 1px solid rgba(0, 255, 65, 0.06);
+    }
+
+    .grade-row:last-child { border-bottom: none; }
+
+    .grade-row .course-name {
+        font-size: 0.9rem;
+        color: var(--text);
+    }
+
+    .grade-row .progress-bar-container {
+        height: 8px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 4px;
+        overflow: hidden;
+    }
+
+    .grade-row .progress-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 0.5s ease;
+    }
+
+    .grade-row .grade-score {
+        font-weight: 900;
+        font-size: 0.9rem;
+        text-align: right;
+    }
+
+    .grade-a { color: var(--green); }
+    .grade-b { color: var(--cyan); }
+    .grade-c { color: var(--amber); }
+    .grade-d { color: var(--red); }
+
+    .capstone-section {
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 22px;
+        margin-bottom: 24px;
+    }
+
+    .capstone-section h3 {
+        color: var(--green);
+        font-size: 1.05rem;
+        margin: 0 0 18px;
+        text-transform: uppercase;
+    }
+
+    .capstone-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px;
+        border: 1px solid rgba(0, 255, 65, 0.1);
+        border-radius: 6px;
+        margin-bottom: 10px;
+        background: rgba(0, 0, 0, 0.2);
+    }
+
+    .capstone-item .cap-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .capstone-item .cap-title {
+        font-weight: 900;
+        font-size: 0.9rem;
+        color: var(--text);
+    }
+
+    .capstone-item .cap-url {
+        color: var(--cyan);
+        font-size: 0.75rem;
+        word-break: break-all;
+    }
+
+    .capstone-item .cap-status {
+        font-size: 0.72rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        padding: 4px 10px;
+        border-radius: 4px;
+    }
+
+    .cap-approved {
+        color: var(--green);
+        border: 1px solid rgba(0, 255, 65, 0.3);
+        background: rgba(0, 255, 65, 0.06);
+    }
+
+    .cap-pending {
+        color: var(--amber);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        background: rgba(251, 191, 36, 0.06);
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        margin-top: 24px;
+    }
+
+    .cyber-btn-print {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 12px 24px;
+        border: 1px solid rgba(0, 255, 65, 0.3);
+        border-radius: 6px;
+        background: rgba(0, 255, 65, 0.08);
+        color: var(--green);
+        font-family: var(--mono);
+        font-weight: 900;
+        text-decoration: none;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .cyber-btn-print:hover {
+        background: rgba(0, 255, 65, 0.15);
+        box-shadow: 0 0 20px rgba(0, 255, 65, 0.3);
+    }
+
+    @media (max-width: 640px) {
+        .report-shell { padding: 24px 16px; }
+        .grade-overview { grid-template-columns: 1fr; }
+        .grade-row { grid-template-columns: 1fr; gap: 8px; }
+        .grade-row .grade-score { text-align: left; }
+        .student-info-bar { flex-direction: column; align-items: flex-start; }
+        .action-buttons { flex-direction: column; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="report-shell">
+    <div class="report-header">
+        <h1>📊 Student Report Card</h1>
+        <p>Comprehensive academic performance summary for the student, including quiz scores per course, grades, and capstone project status.</p>
+    </div>
+
+    <div class="student-info-bar">
+        <div class="info-item">
+            <span class="info-label">Student</span>
+            <span class="info-value">{{ profile.full_name }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Username</span>
+            <span class="info-value">{{ profile.user.username }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Email</span>
+            <span class="info-value">{{ profile.user.email }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Role</span>
+            <span class="info-value">{{ profile.get_role_display }}</span>
+        </div>
+        <div class="info-item">
+            <span class="info-label">Verified</span>
+            <span class="info-value" style="color: {% if profile.is_verified %}var(--green){% else %}var(--amber){% endif %}">
+                {% if profile.is_verified %}✓ Verified{% else %}✗ Pending{% endif %}
+            </span>
+        </div>
+    </div>
+
+    <div class="grade-overview">
+        <div class="grade-card">
+            <div class="grade-label">Courses Completed</div>
+            <div class="grade-value">{{ completed_courses.count }}</div>
+            <div class="grade-sub">with approved capstones</div>
+        </div>
+        <div class="grade-card">
+            <div class="grade-label">Total Quiz Attempts</div>
+            <div class="grade-value">{{ quiz_attempts.count }}</div>
+            <div class="grade-sub">across all courses</div>
+        </div>
+        <div class="grade-card">
+            <div class="grade-label">Average Score</div>
+            <div class="grade-value">
+                {% if quiz_attempts %}
+                    {{ quiz_attempts|length|div:quiz_attempts|length|default:"–" }}%
+                {% else %}
+                    N/A
+                {% endif %}
+            </div>
+            <div class="grade-sub">overall average</div>
+        </div>
+        <div class="grade-card">
+            <div class="grade-label">Capstone Projects</div>
+            <div class="grade-value">{{ project_submissions.count }}</div>
+            <div class="grade-sub">submissions approved</div>
+        </div>
+    </div>
+
+    {% if completed_courses %}
+    <div class="course-grade-section">
+        <h3>📋 Course-by-Course Breakdown</h3>
+        {% for progress in completed_courses %}
+        {% with quiz_scores|get_item:progress.course.id as attempt %}
+        <div class="grade-row">
+            <div class="course-name">
+                <strong>{{ progress.course.title }}</strong>
+                <div style="color:var(--muted);font-size:0.75rem;">{{ progress.course.category }} / {{ progress.course.level }}</div>
+            </div>
+            <div class="progress-bar-container">
+                <div class="progress-fill" style="width:100%; background: linear-gradient(90deg, var(--green), var(--cyan));"></div>
+            </div>
+            <div class="grade-score grade-a">
+                {% if attempt %}
+                    {{ attempt.percentage }}%
+                {% else %}
+                    100%
+                {% endif %}
+            </div>
+        </div>
+        {% endwith %}
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    {% if project_submissions %}
+    <div class="capstone-section">
+        <h3>🏆 Capstone Projects</h3>
+        {% for proj in project_submissions %}
+        <div class="capstone-item">
+            <div class="cap-info">
+                <span class="cap-title">{{ proj.course.title }}</span>
+                <span class="cap-url">{{ proj.github_url }}</span>
+            </div>
+            <span class="cap-status cap-{% if proj.is_approved %}approved{% else %}pending{% endif %}">
+                {% if proj.is_approved %}Approved{% else %}Pending Review{% endif %}
+            </span>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="action-buttons">
+        <a href="{% url 'generate_certificate' %}" class="cyber-btn-print">
+            📜 Download Certificate
+        </a>
+        <button class="cyber-btn-print" onclick="window.print()">
+            🖨 Print Report
+        </button>
+        <a href="{% url 'dashboard' %}" class="cyber-btn-print" style="background:rgba(0,255,255,0.05);border-color:rgba(0,255,255,0.2);color:var(--cyan);">
+            ← Back to Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

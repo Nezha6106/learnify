@@ -352,11 +352,19 @@
                         {% endif %}
                     </label>
 
-                    <label class="terminal-field full" for="{{ form.duration.id_for_label }}">
+                    <label class="terminal-field" for="{{ form.duration.id_for_label }}">
                         Duration
                         <span class="terminal-control">{{ form.duration }}</span>
                         {% if form.duration.errors %}
                             <span class="terminal-error">{{ form.duration.errors.0 }}</span>
+                        {% endif %}
+                    </label>
+
+                    <label class="terminal-field" for="{{ form.duration_hours.id_for_label }}">
+                        Duration (hours)
+                        <span class="terminal-control">{{ form.duration_hours }}</span>
+                        {% if form.duration_hours.errors %}
+                            <span class="terminal-error">{{ form.duration_hours.errors.0 }}</span>
                         {% endif %}
                     </label>
                 </div>
@@ -403,6 +411,15 @@
                     <span class="terminal-help">Leave blank to assign yourself.</span>
                     {% if form.instructor.errors %}
                         <span class="terminal-error">{{ form.instructor.errors.0 }}</span>
+                    {% endif %}
+                </label>
+
+                <label class="terminal-field" for="{{ form.zoom_link.id_for_label }}">
+                    Live Zoom Link
+                    <span class="terminal-control">{{ form.zoom_link }}</span>
+                    <span class="terminal-help">{{ form.zoom_link.help_text }}</span>
+                    {% if form.zoom_link.errors %}
+                        <span class="terminal-error">{{ form.zoom_link.errors.0 }}</span>
                     {% endif %}
                 </label>
 

@@ -1,0 +1,45 @@
+{% extends "courses/instructor_base.html" %}
+
+{% block title %}Confirm Delete Lesson{% endblock %}
+
+{% block extra_css %}
+<style>
+:root{--void:#050505;--glass:rgba(10,15,12,0.45);--green:#00FF41;--red:#ff3860;--text:#e7fff0;--muted:#6f7f78;--line:rgba(0,255,65,0.15);--mono:"Fira Code","Space Mono",Consolas,monospace}
+.confirm-shell{max-width:600px;margin:0 auto;padding:44px clamp(18px,4vw,52px)}
+.confirm-panel{background:var(--glass);backdrop-filter:blur(16px);border:1px solid rgba(255,56,96,0.2);border-radius:8px;padding:32px;text-align:center;position:relative;overflow:hidden}
+.confirm-panel::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,56,96,0.08),transparent) top/100% 1px no-repeat}
+.confirm-icon{font-size:3rem;margin-bottom:16px;display:block}
+.confirm-panel h2{color:var(--red);font-family:var(--mono);margin:0 0 12px}
+.confirm-panel p{color:var(--muted);font-size:0.9rem;line-height:1.6;margin-bottom:20px}
+.confirm-details{text-align:left;background:rgba(0,0,0,0.2);padding:16px;border-radius:6px;margin-bottom:24px}
+.confirm-details p{font-size:0.85rem;margin:4px 0;color:var(--text)}
+.confirm-details span{color:var(--muted);font-size:0.75rem}
+.form-actions{display:flex;gap:12px;justify-content:center}
+.cyber-btn{padding:12px 24px;border:1px solid rgba(255,56,96,0.3);border-radius:6px;font-family:var(--mono);font-weight:900;text-decoration:none;text-transform:uppercase;cursor:pointer;font-size:0.85rem;transition:all 0.2s}
+.cyber-btn.danger{background:rgba(255,56,96,0.1);color:var(--red)}
+.cyber-btn.danger:hover{background:rgba(255,56,96,0.2)}
+.cyber-btn.secondary{background:rgba(0,255,255,0.05);color:var(--cyan);border-color:rgba(0,255,255,0.25)}
+.cyber-btn.secondary:hover{background:rgba(0,255,255,0.1)}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="confirm-shell">
+    <div class="confirm-panel">
+        <span class="confirm-icon">⚠️</span>
+        <h2>Delete Lesson "{{ object.title }}"?</h2>
+        <p>This action cannot be undone. The lesson and all associated data will be permanently removed.</p>
+        <div class="confirm-details">
+            <p><span>Course:</span> <strong>{{ course.title }}</strong></p>
+            <p><span>Lesson:</span> <strong>{{ object.title }}</strong> (Order: {{ object.order }})</p>
+        </div>
+        <div class="form-actions">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="cyber-btn danger">DELETE PERMANENTLY</button>
+            </form>
+            <a href="{% url 'manage_course_components' slug=course.slug %}" class="cyber-btn secondary">CANCEL</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

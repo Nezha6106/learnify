@@ -1,0 +1,24 @@
+{% extends "courses/instructor_base.html" %}
+
+{% block title %}Delete Quiz{% endblock %}
+
+{% block content %}
+<div class="cyber-topbar">
+    <div>
+        <div class="cyber-kicker">DELETE_QUIZ</div>
+        <h1>{{ object.title }}</h1>
+        <div class="topbar-breadcrumb">{{ course.title }}</div>
+    </div>
+</div>
+
+<div class="cyber-grid" style="grid-template-columns:1fr;">
+    <section class="cyber-panel">
+        <p>This will remove the quiz and its questions.</p>
+        <form method="post" class="form-actions">
+            {% csrf_token %}
+            <button type="submit" class="cyber-btn danger">Delete Quiz</button>
+            <a href="{% url 'manage_course_components' slug=course.slug %}" class="cyber-btn secondary">Cancel</a>
+        </form>
+    </section>
+</div>
+{% endblock %}

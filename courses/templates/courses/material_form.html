@@ -1,0 +1,70 @@
+{% extends "courses/instructor_base.html" %}
+
+{% block title %}Material Form{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root { --void: #050505; --glass: rgba(10,15,12,0.45); --green: #00FF41; --cyan: #00FFFF; --red: #ff3860; --text: #e7fff0; --muted: #6f7f78; --line: rgba(0,255,65,0.15); --mono: "Fira Code","Space Mono",Consolas,monospace; }
+    .form-shell { max-width: 900px; margin: 0 auto; padding: 44px clamp(18px,4vw,52px); }
+    .form-panel { background: var(--glass); backdrop-filter: blur(16px); border: 1px solid var(--line); border-radius: 8px; padding: 28px; position: relative; overflow: hidden; }
+    .form-panel::before { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg,transparent,rgba(0,255,65,0.1),transparent) top/100% 1px no-repeat; }
+    .form-topbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; padding-bottom: 16px; border-bottom: 1px solid rgba(0,255,65,0.1); }
+    .form-topbar h2 { color: var(--green); font-family: var(--mono); font-size: 1.2rem; margin: 0; }
+    .form-group { margin-bottom: 18px; }
+    .form-group label { display: block; color: var(--green); font-family: var(--mono); font-size: 0.78rem; font-weight: 900; text-transform: uppercase; margin-bottom: 6px; }
+    .form-group input, .form-group select { width: 100%; min-height: 42px; border: 1px solid rgba(0,255,65,0.2); border-radius: 6px; background: rgba(0,0,0,0.35); color: var(--text); font-family: var(--mono); font-size: 0.9rem; padding: 10px 14px; outline: none; }
+    .form-group input:focus, .form-group select:focus { border-color: var(--cyan); box-shadow: 0 0 0 1px rgba(0,255,255,0.18); }
+    .form-actions { display: flex; gap: 12px; margin-top: 24px; }
+    .cyber-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 0 20px; border: 1px solid rgba(0,255,65,0.24); border-radius: 6px; font-family: var(--mono); font-weight: 900; text-decoration: none; text-transform: uppercase; cursor: pointer; transition: all 0.2s; }
+    .cyber-btn.primary { background: linear-gradient(90deg,var(--green),#32ff73); color: #050505; box-shadow: 0 0 22px rgba(0,255,65,0.22); }
+    .cyber-btn.secondary { background: rgba(0,255,255,0.05); color: var(--cyan); border-color: rgba(0,255,255,0.25); }
+    .cyber-btn:hover { animation: glitch 0.42s steps(2,end) infinite; text-shadow: -2px 0 var(--cyan), 2px 0 var(--red); }
+    @keyframes glitch { 0%,100%{transform:translate(0)} 35%{transform:translate(-1px,1px)} 70%{transform:translate(1px,-1px)} }
+    .field-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
+    .field-grid .form-group.full { grid-column: 1/-1; }
+    @media (max-width:768px){ .field-grid{grid-template-columns:1fr} .form-shell{padding:24px 16px} }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-shell">
+    <div class="form-panel">
+        <div class="form-topbar">
+            <h2>{% if object %}Edit{% else %}Add{% endif %} Material <span style="color:var(--cyan);font-size:0.8rem;">for {{ course.title }}</span></h2>
+            <a href="{% url 'manage_course_components' slug=course.slug %}" class="cyber-btn secondary">← BACK</a>
+        </div>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="field-grid">
+                <div class="form-group full">
+                    <label for="{{ form.title.id_for_label }}">Title *</label>
+                    {{ form.title }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.material_type.id_for_label }}">Type</label>
+                    {{ form.material_type }}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.order.id_for_label }}">Order</label>
+                    {{ form.order }}
+                </div>
+                <div class="form-group full">
+                    <label for="{{ form.material_file.id_for_label }}">Upload File</label>
+                    {{ form.material_file }}
+                    {{ form.material_file.errors }}
+                </div>
+                <div class="form-group full">
+                    <label for="{{ form.material_url.id_for_label }}">External URL</label>
+                    {{ form.material_url }}
+                    {{ form.material_url.errors }}
+                </div>
+            </div>
+            {{ form.non_field_errors }}
+            <div class="form-actions">
+                <button type="submit" class="cyber-btn primary">SAVE MATERIAL</button>
+                <a href="{% url 'manage_course_components' slug=course.slug %}" class="cyber-btn secondary">CANCEL</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

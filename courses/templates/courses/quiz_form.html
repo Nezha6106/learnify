@@ -1,0 +1,52 @@
+{% extends "courses/instructor_base.html" %}
+
+{% block title %}{% if object %}Edit{% else %}Create{% endif %} Quiz{% endblock %}
+
+{% block extra_css %}
+<style>
+    .form-shell{max-width:900px;margin:0 auto;padding:44px clamp(18px,4vw,52px)}
+    .form-panel{background:rgba(10,15,12,.45);backdrop-filter:blur(16px);border:1px solid rgba(0,255,65,.15);border-radius:8px;padding:28px;box-shadow:0 24px 80px rgba(0,0,0,.45)}
+    .form-topbar{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:24px;padding-bottom:16px;border-bottom:1px solid rgba(0,255,65,.1)}
+    .form-topbar h2{margin:0;color:#00ff41;font-family:"Fira Code","Space Mono",Consolas,monospace;font-size:1.2rem;text-transform:uppercase}
+    .field-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+    .form-group.full{grid-column:1/-1}
+    .form-group label{display:block;margin-bottom:6px;color:#00ff41;font-family:"Fira Code","Space Mono",Consolas,monospace;font-size:.78rem;font-weight:900;text-transform:uppercase}
+    .form-group input,.form-group textarea,.form-group select{width:100%;min-height:42px;border:1px solid rgba(0,255,65,.2);border-radius:6px;background:rgba(0,0,0,.35);color:#e7fff0;font-family:"Fira Code","Space Mono",Consolas,monospace;padding:10px 14px;outline:none}
+    .form-group textarea{min-height:120px;resize:vertical}
+    .form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:#00ffff;box-shadow:0 0 0 1px rgba(0,255,255,.18)}
+    .form-actions{display:flex;gap:12px;margin-top:24px}
+    .cyber-btn{display:inline-flex;align-items:center;justify-content:center;min-height:42px;padding:0 20px;border:1px solid rgba(0,255,65,.24);border-radius:6px;font-family:"Fira Code","Space Mono",Consolas,monospace;font-weight:900;text-decoration:none;text-transform:uppercase;cursor:pointer}
+    .cyber-btn.primary{background:#00ff41;color:#050505;box-shadow:0 0 22px rgba(0,255,65,.22)}
+    .cyber-btn.secondary{background:rgba(0,255,255,.05);color:#00ffff;border-color:rgba(0,255,255,.25)}
+    @media(max-width:768px){.field-grid{grid-template-columns:1fr}.form-shell{padding:24px 16px}}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-shell">
+    <div class="form-panel">
+        <div class="form-topbar">
+            <h2>{% if object %}Edit{% else %}Create{% endif %} Quiz <span style="color:#00ffff;font-size:.8rem;">for {{ course.title }}</span></h2>
+            <a href="{% url 'manage_course_components' slug=course.slug %}" class="cyber-btn secondary">Back</a>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            <div class="field-grid">
+                {% for field in form %}
+                    <div class="form-group {% if field.name == 'description' %}full{% endif %}">
+                        <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                        {{ field }}
+                        {{ field.errors }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="cyber-btn primary">Save Quiz</button>
+                <a href="{% url 'manage_course_components' slug=course.slug %}" class="cyber-btn secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

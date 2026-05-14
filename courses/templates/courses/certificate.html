@@ -1,0 +1,333 @@
+{% load static %}
+{% extends "courses/instructor_base.html" %}
+
+{% block title %}Generate Certificate{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --void: #050505;
+        --glass: rgba(10, 15, 12, 0.45);
+        --green: #00FF41;
+        --cyan: #00FFFF;
+        --gold: #FFD700;
+        --purple: #a855f7;
+        --text: #e7fff0;
+        --muted: #6f7f78;
+        --line: rgba(0, 255, 65, 0.15);
+        --mono: "Fira Code", "Space Mono", "Consolas", monospace;
+    }
+
+    .cert-shell {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 44px clamp(18px, 4vw, 52px) 64px;
+    }
+
+    .cert-topbar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 18px;
+        margin-bottom: 32px;
+        padding: 18px 22px;
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+    }
+
+    .cert-topbar h2 {
+        color: var(--green);
+        font-family: var(--mono);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .cert-selector {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .cert-selector select {
+        min-height: 38px;
+        border: 1px solid rgba(0, 255, 65, 0.22);
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.38);
+        color: var(--text);
+        padding: 8px 12px;
+        font-family: var(--mono);
+        font-size: 0.85rem;
+        outline: none;
+    }
+
+    .cert-selector select:focus {
+        border-color: var(--cyan);
+    }
+
+    .cert-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+        gap: 24px;
+    }
+
+    .cert-card {
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .cert-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.08), transparent) top / 100% 1px no-repeat;
+        pointer-events: none;
+    }
+
+    .cert-badge {
+        padding: 24px;
+        text-align: center;
+        position: relative;
+    }
+
+    .cert-badge::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: radial-gradient(circle at center, rgba(0, 255, 65, 0.06), transparent 70%);
+    }
+
+    .cert-icon {
+        font-size: 2.4rem;
+        margin-bottom: 12px;
+        display: block;
+    }
+
+    .cert-course-title {
+        color: var(--green);
+        font-family: var(--mono);
+        font-size: 1rem;
+        font-weight: 900;
+        margin: 0 0 8px;
+    }
+
+    .cert-student {
+        color: var(--text);
+        font-size: 0.95rem;
+        margin-bottom: 6px;
+    }
+
+    .cert-date {
+        color: var(--muted);
+        font-size: 0.78rem;
+        margin-bottom: 16px;
+    }
+
+    .cert-grade {
+        display: inline-block;
+        padding: 4px 16px;
+        border-radius: 999px;
+        font-weight: 900;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        margin-bottom: 16px;
+    }
+
+    .cert-grade.grade-a {
+        background: rgba(0, 255, 65, 0.1);
+        color: var(--green);
+        border: 1px solid rgba(0, 255, 65, 0.3);
+    }
+
+    .cert-grade.grade-b {
+        background: rgba(0, 255, 255, 0.08);
+        color: var(--cyan);
+        border: 1px solid rgba(0, 255, 255, 0.25);
+    }
+
+    .cert-info {
+        padding: 14px 20px;
+        border-top: 1px solid var(--line);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .cert-info span {
+        color: var(--muted);
+        font-size: 0.72rem;
+    }
+
+    .cert-info strong {
+        color: var(--text);
+    }
+
+    .cert-actions {
+        display: flex;
+        gap: 6px;
+    }
+
+    .cert-btn {
+        min-height: 32px;
+        padding: 0 10px;
+        border-radius: 4px;
+        font-size: 0.7rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        font-family: var(--mono);
+        text-decoration: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        border: 1px solid transparent;
+    }
+
+    .cert-btn.print {
+        background: rgba(0, 255, 65, 0.08);
+        color: var(--green);
+        border-color: rgba(0, 255, 65, 0.2);
+    }
+
+    .cert-btn.print:hover {
+        background: rgba(0, 255, 65, 0.15);
+    }
+
+    .cert-btn.download {
+        background: rgba(0, 255, 255, 0.05);
+        color: var(--cyan);
+        border-color: rgba(0, 255, 255, 0.15);
+    }
+
+    .cert-btn.download:hover {
+        background: rgba(0, 255, 255, 0.1);
+    }
+
+    .empty-cert {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--muted);
+    }
+
+    .empty-cert .empty-icon {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        opacity: 0.4;
+    }
+
+    form.cert-form {
+        display: inline;
+    }
+
+    @media (max-width: 768px) {
+        .cert-grid { grid-template-columns: 1fr; }
+        .cert-topbar { flex-direction: column; align-items: flex-start; }
+        .cert-selector { width: 100%; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cert-shell">
+    <div class="cert-topbar">
+        <div>
+            <h2>📜 Certificate Generator</h2>
+            <div style="color:var(--muted);font-size:0.8rem;margin-top:4px;">
+                Generate printable certificates for students who have completed courses with approved capstone projects.
+            </div>
+        </div>
+    </div>
+
+    {% if eligible_courses %}
+    <form method="post" class="cert-form" style="margin-bottom:24px;">
+        {% csrf_token %}
+        <div class="cert-selector">
+            <label style="color:var(--muted);font-size:0.8rem;font-weight:900;text-transform:uppercase;">Select Course:</label>
+            <select name="course_id" required>
+                {% for c in eligible_courses %}
+                <option value="{{ c.id }}">{{ c.title }}</option>
+                {% endfor %}
+            </select>
+            <button type="submit" name="generate" class="cyber-btn secondary" style="min-height:38px;padding:0 16px;">
+                GENERATE CERTIFICATE
+            </button>
+        </div>
+    </form>
+
+    {% if certificate %}
+    <div style="display:flex;justify-content:center;margin-bottom:32px;">
+        <div class="cert-card" style="max-width:520px;">
+            <div class="cert-badge">
+                <span class="cert-icon">🛡️</span>
+                <p class="cert-student" style="font-size:0.85rem;color:var(--muted);margin-bottom:4px;">AWARDED TO</p>
+                <p class="cert-student" style="font-size:1.3rem;font-weight:900;color:var(--green);">{{ certificate.student_name }}</p>
+                <p class="cert-course-title">{{ certificate.course_title }}</p>
+                <p class="cert-date">{{ certificate.date }}</p>
+                <span class="cert-grade grade-a">{{ certificate.grade }}</span>
+                <div style="color:var(--muted);font-size:0.75rem;margin-bottom:12px;">
+                    Score: {{ certificate.quiz_score }} ({{ certificate.percentage }})
+                </div>
+                <div style="border-top:1px solid var(--line);padding-top:14px;margin-top:14px;">
+                    <p style="color:var(--muted);font-size:0.7rem;margin-bottom:4px;">Authorized by</p>
+                    <p style="color:var(--cyan);font-weight:900;font-size:0.9rem;">{{ certificate.signature_line }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
+        <form method="post" style="display:inline;">
+            {% csrf_token %}
+            <input type="hidden" name="course_id" value="{{ certificate_data.course.id if certificate_data }}">
+            <button type="submit" name="download_pdf" class="cert-btn print">🖨 Print / Save PDF</button>
+        </form>
+        <button class="cert-btn download" onclick="window.print()">📥 Download as PDF</button>
+        <a href="{% url 'generate_certificate' %}" class="cert-btn download">← Back</a>
+    </div>
+    {% endif %}
+
+    <div class="cert-grid">
+        {% for c in eligible_courses %}
+        <div class="cert-card">
+            <div class="cert-badge">
+                <span class="cert-icon">📜</span>
+                <p class="cert-course-title">{{ c.title }}</p>
+                <p class="cert-student">{{ profile.full_name }}</p>
+                <p class="cert-date">{{ timezone.now|date:"F d, Y" }}</p>
+                <span class="cert-grade grade-a">ELIGIBLE</span>
+            </div>
+            <div class="cert-info">
+                <span>Category: <strong>{{ c.category }}</strong></span>
+                <span>Level: <strong>{{ c.level }}</strong></span>
+                <div class="cert-actions">
+                    <form method="post" class="cert-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="course_id" value="{{ c.id }}">
+                        <button type="submit" name="generate" class="cert-btn print">Generate</button>
+                    </form>
+                    <button class="cert-btn download" onclick="window.print()">Print</button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% else %}
+    <div class="cert-grid">
+        <div class="empty-cert">
+            <div class="empty-icon">📜</div>
+            <h3 style="color:var(--text);margin-bottom:8px;">No Eligible Certificates</h3>
+            <p>You need to complete a course and submit an approved capstone project before generating a certificate.</p>
+            <a href="{% url 'dashboard' %}" class="cyber-btn secondary" style="margin-top:16px;">Go to Dashboard</a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

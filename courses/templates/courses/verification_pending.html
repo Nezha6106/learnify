@@ -1,0 +1,240 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Pending | Learnify</title>
+    <link rel="stylesheet" href="{% static 'courses/hacker-theme.css' %}">
+    <style>
+        :root {
+            --void: #050505;
+            --glass: rgba(10, 15, 12, 0.45);
+            --green: #00FF41;
+            --cyan: #00FFFF;
+            --amber: #fbbf24;
+            --red: #ff3860;
+            --text: #e7fff0;
+            --muted: #6f7f78;
+            --line: rgba(0, 255, 65, 0.15);
+            --mono: "Fira Code", "Space Mono", "Consolas", monospace;
+        }
+        body {
+            min-height: 100vh;
+            background:
+                radial-gradient(circle at 50% 30%, rgba(251, 191, 36, 0.08), transparent 40%),
+                radial-gradient(circle at 86% 78%, rgba(0, 255, 255, 0.05), transparent 32%),
+                var(--void);
+            color: var(--text);
+            font-family: var(--mono);
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            background:
+                repeating-linear-gradient(90deg, transparent 0 44px, rgba(251, 191, 36, 0.02) 45px, transparent 46px),
+                repeating-linear-gradient(180deg, rgba(251, 191, 36, 0.018) 0 1px, transparent 1px 32px);
+            opacity: 0.45;
+        }
+        .topbar, main { position: relative; z-index: 1; }
+        .warning-shell {
+            display: grid;
+            gap: 24px;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 64px clamp(18px, 4vw, 52px);
+        }
+        .warning-panel {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 8px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            padding: clamp(32px, 5vw, 56px);
+        }
+        .warning-panel::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.1), transparent) top / 100% 1px no-repeat;
+            pointer-events: none;
+        }
+        .warning-icon {
+            font-size: 4rem;
+            margin-bottom: 24px;
+            display: block;
+            filter: drop-shadow(0 0 20px rgba(251, 191, 36, 0.4));
+        }
+        .warning-panel h1 {
+            color: var(--amber);
+            font-family: var(--mono);
+            font-size: clamp(1.6rem, 5vw, 3rem);
+            margin: 0 0 16px;
+            text-shadow: 0 0 18px rgba(251, 191, 36, 0.3);
+        }
+        .warning-panel p {
+            color: var(--muted);
+            font-size: 1rem;
+            line-height: 1.7;
+            max-width: 600px;
+            margin: 0 auto 24px;
+        }
+        .warning-panel .status-box {
+            display: inline-block;
+            padding: 12px 24px;
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 6px;
+            background: rgba(251, 191, 36, 0.06);
+            color: var(--amber);
+            font-weight: 900;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 24px;
+        }
+        .warning-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .warning-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            min-height: 44px;
+            padding: 0 20px;
+            border-radius: 6px;
+            font-family: var(--mono);
+            font-weight: 900;
+            text-decoration: none;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .warning-btn.primary {
+            background: var(--amber);
+            color: #050505;
+            border: 1px solid rgba(251, 191, 36, 0.5);
+            box-shadow: 0 0 20px rgba(251, 191, 36, 0.2);
+        }
+        .warning-btn.primary:hover {
+            background: #fbbf24;
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.4);
+            transform: translateY(-2px);
+        }
+        .warning-btn.secondary {
+            background: transparent;
+            color: var(--muted);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .warning-btn.secondary:hover {
+            color: var(--text);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .bottom-info {
+            background: var(--glass);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--line);
+            border-radius: 8px;
+            padding: 24px;
+        }
+        .bottom-info h3 {
+            color: var(--cyan);
+            font-size: 0.9rem;
+            margin: 0 0 12px;
+            text-transform: uppercase;
+        }
+        .bottom-info ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .bottom-info li {
+            color: var(--muted);
+            font-size: 0.85rem;
+            line-height: 1.8;
+            padding-left: 20px;
+            position: relative;
+        }
+        .bottom-info li::before {
+            content: ">";
+            position: absolute;
+            left: 0;
+            color: var(--green);
+            font-weight: 900;
+        }
+        @media (max-width: 640px) {
+            .warning-shell { padding: 32px 16px; }
+            .warning-panel { padding: 24px 16px; }
+            .warning-btn { width: 100%; justify-content: center; }
+        }
+    </style>
+</head>
+<body>
+    <header class="topbar">
+        <a class="brand" href="{% url 'home' %}" aria-label="Learnify home">
+            <span class="brand-mark">L</span>
+            <span>Learnify</span>
+        </a>
+        <nav class="nav-links" aria-label="Primary">
+            <a href="{% url 'home' %}">Home</a>
+            {% if user.is_authenticated %}
+            <span class="nav-user">{{ user.username }}</span>
+            <form method="post" action="{% url 'logout' %}">
+                {% csrf_token %}
+                <button class="nav-button" type="submit">Logout</button>
+            </form>
+            {% endif %}
+        </nav>
+    </header>
+
+    <main>
+        <div class="warning-shell">
+            <div class="warning-panel">
+                <span class="warning-icon">⚠</span>
+                <div class="status-box">Verification Pending</div>
+                <h1>Access Restricted</h1>
+                <p>
+                    Your account is currently awaiting verification. You must be verified by an administrator
+                    before you can access course content, quizzes, and the student dashboard.
+                </p>
+                <div class="warning-actions">
+                    {% if user.is_authenticated %}
+                    <a href="{% url 'user_profile' %}" class="warning-btn primary">
+                        Upload Verification Doc
+                    </a>
+                    <a href="{% url 'home' %}" class="warning-btn secondary">
+                        Browse Public Courses
+                    </a>
+                    {%else%}
+                    <a href="{% url 'login' %}" class="warning-btn primary">
+                        Sign In
+                    </a>
+                    <a href="{% url 'signup' %}" class="warning-btn secondary">
+                        Create Account
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="bottom-info">
+                <h3>Why is verification required?</h3>
+                <ul>
+                    <li>Ensures a safe and authentic learning environment for all students.</li>
+                    <li>Grants access to enrolled courses, live sessions, and quiz engines.</li>
+                    <li>Enables certificate generation and progress tracking.</li>
+                    <li>Typically reviewed within 24–48 hours by the admin team.</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+</body>
+</html>

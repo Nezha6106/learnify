@@ -3,7 +3,7 @@ from django.test import TestCase
 from django.urls import reverse
 from django.utils import timezone
 
-from .models import Course, Enrollment, LiveSession
+from .models import Course, Enrollment, LiveSession, UserProfile
 
 
 class LmsFlowTests(TestCase):
@@ -40,6 +40,7 @@ class LmsFlowTests(TestCase):
 
         self.assertRedirects(response, reverse("login"))
         self.assertTrue(User.objects.filter(username="student", email="student@example.com").exists())
+        self.assertTrue(UserProfile.objects.filter(user__username="student", is_verified=False).exists())
 
     def test_dashboard_requires_login(self):
         response = self.client.get(reverse("dashboard"))
@@ -53,6 +54,7 @@ class LmsFlowTests(TestCase):
             email="student@example.com",
             password="StrongPass123!",
         )
+        UserProfile.objects.create(user=user, is_verified=True, verification_status="verified")
         self.client.force_login(user)
 
         response = self.client.post(

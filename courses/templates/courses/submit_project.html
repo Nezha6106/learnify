@@ -1,0 +1,274 @@
+{% extends "courses/instructor_base.html" %}
+
+{% block title %}Submit Capstone Project{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --void: #050505;
+        --glass: rgba(10, 15, 12, 0.45);
+        --green: #00FF41;
+        --cyan: #00FFFF;
+        --red: #ff3860;
+        --text: #e7fff0;
+        --muted: #6f7f78;
+        --line: rgba(0, 255, 65, 0.15);
+        --mono: "Fira Code", "Space Mono", "Consolas", monospace;
+    }
+
+    .submit-shell {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 44px clamp(18px, 4vw, 52px);
+    }
+
+    .submit-panel {
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        padding: 32px;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .submit-panel::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent) top / 100% 1px no-repeat;
+    }
+
+    .submit-header h1 {
+        color: var(--green);
+        font-family: var(--mono);
+        font-size: clamp(1.6rem, 4vw, 2.4rem);
+        margin: 0 0 8px;
+        text-shadow: 0 0 18px rgba(0, 255, 65, 0.3);
+    }
+
+    .submit-header p {
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    .course-selector {
+        margin-bottom: 24px;
+    }
+
+    .course-selector select {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid rgba(0, 255, 65, 0.22);
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.38);
+        color: var(--text);
+        padding: 10px 14px;
+        font-family: var(--mono);
+        font-size: 0.9rem;
+        outline: none;
+    }
+
+    .course-selector select:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 0 1px rgba(0, 255, 255, 0.18);
+    }
+
+    .form-section {
+        margin-bottom: 20px;
+    }
+
+    .form-section label {
+        display: block;
+        color: var(--green);
+        font-weight: 900;
+        font-size: 0.78rem;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+
+    .form-section input,
+    .form-section textarea {
+        width: 100%;
+        min-height: 44px;
+        border: 1px solid rgba(0, 255, 65, 0.2);
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.3);
+        color: var(--text);
+        padding: 10px 14px;
+        font-family: var(--mono);
+        font-size: 0.9rem;
+        outline: none;
+    }
+
+    .form-section textarea {
+        min-height: 100px;
+        resize: vertical;
+    }
+
+    .form-section input:focus,
+    .form-section textarea:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
+    }
+
+    .submit-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 14px 28px;
+        border: 1px solid rgba(0, 255, 65, 0.3);
+        border-radius: 6px;
+        background: linear-gradient(90deg, var(--green), #32ff73);
+        color: #050505;
+        font-family: var(--mono);
+        font-weight: 900;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .submit-btn:hover {
+        animation: glitch 0.42s steps(2, end) infinite;
+        text-shadow: -2px 0 var(--cyan), 2px 0 var(--red);
+        box-shadow: 0 0 24px rgba(0, 255, 65, 0.3);
+    }
+
+    @keyframes glitch {
+        0%, 100% { transform: translate(0); }
+        35% { transform: translate(-1px, 1px); }
+        70% { transform: translate(1px, -1px); }
+    }
+
+    .form-help {
+        color: var(--muted);
+        font-size: 0.75rem;
+        margin-top: 6px;
+    }
+
+    .existing-projects {
+        margin-top: 32px;
+    }
+
+    .existing-projects h3 {
+        color: var(--cyan);
+        font-size: 0.9rem;
+        margin: 0 0 12px;
+    }
+
+    .project-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 16px;
+        border: 1px solid rgba(0, 255, 65, 0.08);
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.15);
+        margin-bottom: 8px;
+    }
+
+    .project-item .proj-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .project-item .proj-course {
+        font-weight: 900;
+        font-size: 0.88rem;
+        color: var(--text);
+    }
+
+    .project-item .proj-url {
+        color: var(--cyan);
+        font-size: 0.72rem;
+        word-break: break-all;
+    }
+
+    .project-item .proj-status {
+        font-size: 0.72rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        padding: 3px 10px;
+        border-radius: 4px;
+    }
+
+    .proj-approved {
+        color: var(--green);
+        border: 1px solid rgba(0, 255, 65, 0.3);
+        background: rgba(0, 255, 65, 0.06);
+    }
+
+    .proj-pending {
+        color: var(--amber);
+        border: 1px solid rgba(251, 191, 36, 0.3);
+        background: rgba(251, 191, 36, 0.06);
+    }
+
+    @media (max-width: 600px) {
+        .submit-shell { padding: 24px 16px; }
+        .submit-panel { padding: 20px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="submit-shell">
+    <div class="submit-panel">
+        <div class="submit-header">
+            <h1>🚀 Submit Capstone Project</h1>
+            <p>Submit your final project GitHub repository for review. Once approved, you'll be eligible to receive your completion certificate.</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+
+            <div class="course-selector">
+                <label for="course_select">Select Completed Course:</label>
+                <select id="course_select" name="course_id" required>
+                    <option value="">— Choose a course —</option>
+                    {% for c in eligible_courses %}
+                    <option value="{{ c.id }}">{{ c.title }} ({{ c.level }})</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-section">
+                <label for="github_url">GitHub Repository URL</label>
+                <input type="url" id="github_url" name="github_url"
+                       placeholder="https://github.com/your-username/your-project"
+                       required value="{{ form.data.github_url|default:'' }}">
+                <p class="form-help">Paste the full URL of your public GitHub repository containing the project code.</p>
+            </div>
+
+            <div class="form-section">
+                <label for="description">Project Description</label>
+                <textarea id="description" name="description"
+                          placeholder="Briefly describe what your project does, what technologies you used, and any challenges you overcame...">{{ form.data.description|default:'' }}</textarea>
+            </div>
+
+            <button type="submit" class="submit-btn">✉ Submit for Review</button>
+        </form>
+
+        {% if project_submissions %}
+        <div class="existing-projects">
+            <h3>📋 Your Existing Submissions</h3>
+            {% for proj in project_submissions %}
+            <div class="project-item">
+                <div class="proj-info">
+                    <span class="proj-course">{{ proj.course.title }}</span>
+                    <span class="proj-url">{{ proj.github_url }}</span>
+                </div>
+                <span class="proj-status proj-{% if proj.is_approved %}approved{% else %}pending{% endif %}">
+                    {% if proj.is_approved %}Approved{% else %}Pending Review{% endif %}
+                </span>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

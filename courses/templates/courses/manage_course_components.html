@@ -1,0 +1,400 @@
+{% extends "courses/instructor_base.html" %}
+
+{% block title %}Manage Course Components{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --void: #050505;
+        --glass: rgba(10, 15, 12, 0.45);
+        --green: #00FF41;
+        --cyan: #00FFFF;
+        --purple: #a855f7;
+        --red: #ff3860;
+        --amber: #fbbf24;
+        --text: #e7fff0;
+        --muted: #6f7f78;
+        --line: rgba(0, 255, 65, 0.15);
+        --mono: "Fira Code", "Space Mono", "Consolas", monospace;
+    }
+
+    .component-grid {
+        display: grid;
+        gap: 22px;
+    }
+
+    .component-panel {
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+        overflow: hidden;
+    }
+
+    .component-panel::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.1), transparent) top / 100% 1px no-repeat;
+        pointer-events: none;
+    }
+
+    .component-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 18px 22px;
+        border-bottom: 1px solid rgba(0, 255, 65, 0.1);
+    }
+
+    .component-header h3 {
+        margin: 0;
+        color: var(--green);
+        font-family: var(--mono);
+        font-size: 1rem;
+        text-transform: uppercase;
+    }
+
+    .component-header h3 span {
+        color: var(--cyan);
+        font-size: 0.72rem;
+    }
+
+    .component-header .cyber-btn {
+        min-height: 34px;
+        padding: 0 12px;
+        font-size: 0.72rem;
+    }
+
+    .component-body {
+        padding: 16px 22px;
+    }
+
+    .component-list-item {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto auto;
+        gap: 12px;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(0, 255, 65, 0.06);
+    }
+
+    .component-list-item:last-child {
+        border-bottom: none;
+    }
+
+    .component-list-item .item-info {
+        color: var(--text);
+        font-size: 0.88rem;
+        font-weight: 600;
+    }
+
+    .component-list-item .item-meta {
+        color: var(--muted);
+        font-size: 0.75rem;
+    }
+
+    .component-list-item .item-actions {
+        display: flex;
+        gap: 6px;
+    }
+
+    .component-list-item .btn-icon {
+        width: 30px;
+        height: 30px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 4px;
+        border: 1px solid rgba(0, 255, 255, 0.15);
+        background: rgba(0, 255, 255, 0.04);
+        color: var(--cyan);
+        font-size: 0.75rem;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .component-list-item .btn-icon:hover {
+        background: rgba(0, 255, 65, 0.1);
+        border-color: var(--green);
+        color: var(--green);
+    }
+
+    .component-list-item .btn-icon.btn-danger:hover {
+        border-color: var(--red);
+        color: var(--red);
+        background: rgba(255, 56, 96, 0.06);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 24px;
+        color: var(--muted);
+        font-size: 0.85rem;
+    }
+
+    .create-form {
+        background: rgba(0, 0, 0, 0.22);
+        padding: 16px;
+        border-radius: 6px;
+        margin-bottom: 16px;
+    }
+
+    .create-form .terminal-field {
+        display: grid;
+        gap: 6px;
+        margin-bottom: 12px;
+    }
+
+    .create-form .terminal-field label {
+        color: var(--green);
+        font-size: 0.76rem;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    .create-form .terminal-control {
+        position: relative;
+    }
+
+    .create-form .terminal-control::before {
+        content: ">";
+        position: absolute;
+        left: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: var(--green);
+        pointer-events: none;
+        font-size: 0.85rem;
+    }
+
+    .create-form input,
+    .create-form textarea,
+    .create-form select {
+        width: 100%;
+        min-height: 40px;
+        border: 1px solid rgba(0, 255, 65, 0.2);
+        border-radius: 4px;
+        background: rgba(0, 0, 0, 0.35);
+        color: var(--text);
+        padding: 8px 12px 8px 30px;
+        font-family: var(--mono);
+        font-size: 0.85rem;
+        outline: none;
+    }
+
+    .create-form textarea {
+        resize: vertical;
+        min-height: 80px;
+        padding-top: 10px;
+    }
+
+    .create-form input:focus,
+    .create-form textarea:focus,
+    .create-form select:focus {
+        border-color: var(--cyan);
+        box-shadow: 0 0 8px rgba(0, 255, 255, 0.2);
+    }
+
+    @media (max-width: 768px) {
+        .component-list-item {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .component-list-item .item-actions {
+            justify-self: flex-end;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cyber-topbar">
+    <div>
+        <div class="cyber-kicker">COMPONENT_REGISTRY</div>
+        <h1>{{ course.title }}</h1>
+        <div class="topbar-breadcrumb">
+            Home / <a href="{% url 'instructor_course_list' %}" class="text-decoration-none">Courses</a> / {{ course.title }} / Components
+        </div>
+    </div>
+    <a href="{% url 'instructor_course_list' %}" class="cyber-btn secondary">
+        BACK
+    </a>
+</div>
+
+<div class="cyber-grid" style="grid-template-columns: 1fr;">
+    <div class="component-grid">
+
+        <!-- Lessons -->
+        <div class="component-panel">
+            <div class="component-header">
+                <h3><span>📘</span> Lessons <span>({{ lessons.count }})</span></h3>
+                <a href="{% url 'lesson_create' slug=course.slug %}" class="cyber-btn secondary">+ ADD LESSON</a>
+            </div>
+            <div class="component-body">
+                {% if lessons %}
+                    {% for lesson in lessons %}
+                    <div class="component-list-item">
+                        <div>
+                            <div class="item-info">{{ forloop.counter }}. {{ lesson.title }}</div>
+                            <div class="item-meta">{{ lesson.duration_minutes }} min</div>
+                        </div>
+                        <div class="item-actions">
+                            <a href="{% url 'lesson_update' slug=course.slug pk=lesson.pk %}" class="btn-icon">✏</a>
+                            <a href="{% url 'lesson_delete' slug=course.slug pk=lesson.pk %}" class="btn-icon btn-danger">✕</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">No lessons yet. Click "Add Lesson" to create one.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Course Materials -->
+        <div class="component-panel">
+            <div class="component-header">
+                <h3><span>📁</span> Course Materials <span>({{ materials.count }})</span></h3>
+                <a href="{% url 'material_create' slug=course.slug %}" class="cyber-btn secondary">+ ADD MATERIAL</a>
+            </div>
+            <div class="component-body">
+                {% if materials %}
+                    {% for material in materials %}
+                    <div class="component-list-item">
+                        <div>
+                            <div class="item-info">{{ material.title }}</div>
+                            <div class="item-meta">{{ material.material_type }} · Order {{ material.order }}</div>
+                        </div>
+                        <div class="item-actions">
+                            <a href="{% url 'material_update' slug=course.slug pk=material.pk %}" class="btn-icon">✏</a>
+                            <a href="{% url 'material_delete' slug=course.slug pk=material.pk %}" class="btn-icon btn-danger">✕</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">No materials yet. Click "Add Material" to create one.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Announcements -->
+        <div class="component-panel">
+            <div class="component-header">
+                <h3><span>📢</span> Announcements <span>({{ announcements.count }})</span></h3>
+                <a href="{% url 'announcement_create' slug=course.slug %}" class="cyber-btn secondary">+ ADD ANNOUNCEMENT</a>
+            </div>
+            <div class="component-body">
+                {% if announcements %}
+                    {% for ann in announcements %}
+                    <div class="component-list-item">
+                        <div>
+                            <div class="item-info">{{ ann.title }}</div>
+                            <div class="item-meta">{{ ann.created_at|date:"M d, Y" }}</div>
+                        </div>
+                        <div class="item-actions">
+                            <a href="{% url 'announcement_update' slug=course.slug pk=ann.pk %}" class="btn-icon">✏</a>
+                            <a href="{% url 'announcement_delete' slug=course.slug pk=ann.pk %}" class="btn-icon btn-danger">✕</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">No announcements yet. Click "Add Announcement" to create one.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Live Sessions -->
+        <div class="component-panel">
+            <div class="component-header">
+                <h3><span>🎥</span> Live Sessions <span>({{ live_sessions.count }})</span></h3>
+                <a href="{% url 'session_create' slug=course.slug %}" class="cyber-btn secondary">+ ADD SESSION</a>
+            </div>
+            <div class="component-body">
+                {% if live_sessions %}
+                    {% for session in live_sessions %}
+                    <div class="component-list-item">
+                        <div>
+                            <div class="item-info">{{ session.title }}</div>
+                            <div class="item-meta">{{ session.starts_at|date:"M d, Y H:i" }} / {{ session.duration_minutes }} min</div>
+                        </div>
+                        <div class="item-actions">
+                            <a href="{% url 'session_update' slug=course.slug pk=session.pk %}" class="btn-icon">✏</a>
+                            <a href="{% url 'session_delete' slug=course.slug pk=session.pk %}" class="btn-icon btn-danger">✕</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">No live sessions yet. Click "Add Session" to create one.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quiz Questions -->
+        <div class="component-panel">
+            <div class="component-header">
+                <h3><span>QZ</span> Quiz Modules <span>({{ quizzes.count }})</span></h3>
+                <a href="{% url 'quiz_create' slug=course.slug %}" class="cyber-btn secondary">+ ADD QUIZ</a>
+            </div>
+            <div class="component-body">
+                {% if quizzes %}
+                    {% for quiz in quizzes %}
+                    <div class="component-list-item">
+                        <div>
+                            <div class="item-info">{{ quiz.order }}. {{ quiz.title }}</div>
+                            <div class="item-meta">{{ quiz.questions.count }} questions / Pass {{ quiz.pass_percentage }}%{% if not quiz.is_active %} / Draft{% endif %}</div>
+                        </div>
+                        <div class="item-actions">
+                            <a href="{% url 'question_create' slug=course.slug quiz_pk=quiz.pk %}" class="btn-icon">+</a>
+                            <a href="{% url 'quiz_update' slug=course.slug pk=quiz.pk %}" class="btn-icon">E</a>
+                            <a href="{% url 'quiz_delete' slug=course.slug pk=quiz.pk %}" class="btn-icon btn-danger">X</a>
+                        </div>
+                    </div>
+                        {% for question in quiz.questions.all %}
+                        <div class="component-list-item" style="padding-left:24px;">
+                            <div>
+                                <div class="item-info">Q{{ question.order }}. {{ question.question_text }}</div>
+                                <div class="item-meta">Answer: {{ question.get_correct_answer_display }}</div>
+                            </div>
+                            <div class="item-actions">
+                                <a href="{% url 'question_update' slug=course.slug pk=question.pk %}" class="btn-icon">E</a>
+                                <a href="{% url 'question_delete' slug=course.slug pk=question.pk %}" class="btn-icon btn-danger">X</a>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">No quiz modules yet. Click "Add Quiz" for the preferred quiz engine.</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Legacy Quiz Questions -->
+        <div class="component-panel">
+            <div class="component-header">
+                <h3><span>❓</span> Quiz Questions <span>({{ quiz_questions.count }})</span></h3>
+                <a href="{% url 'quiz_question_create' slug=course.slug %}" class="cyber-btn secondary">+ ADD QUESTION</a>
+            </div>
+            <div class="component-body">
+                {% if quiz_questions %}
+                    {% for q in quiz_questions %}
+                    <div class="component-list-item">
+                        <div>
+                            <div class="item-info">Q{{ forloop.counter }}. {{ q.question }}</div>
+                            <div class="item-meta">Answer: {{ q.get_correct_answer_display }}</div>
+                        </div>
+                        <div class="item-actions">
+                            <a href="{% url 'quiz_question_update' slug=course.slug pk=q.pk %}" class="btn-icon">✏</a>
+                            <a href="{% url 'quiz_question_delete' slug=course.slug pk=q.pk %}" class="btn-icon btn-danger">✕</a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="empty-state">No quiz questions yet. Click "Add Question" to create one.</div>
+                {% endif %}
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

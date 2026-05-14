@@ -1,711 +1,545 @@
+{% extends 'courses/instructor_base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Comprehensive Report | Learnify Admin</title>
-    <link rel="stylesheet" href="{% static 'courses/hacker-theme.css' %}">
-    <style>
-        :root {
-            --void: #050505;
-            --glass: rgba(10, 15, 12, 0.45);
-            --green: #00FF41;
-            --cyan: #00FFFF;
-            --purple: #a855f7;
-            --red: #ff3860;
-            --amber: #fbbf24;
-            --text: #e7fff0;
-            --muted: #6f7f78;
-            --line: rgba(0, 255, 65, 0.15);
-            --mono: "Fira Code", "Space Mono", "Consolas", monospace;
+
+{% block title %}Comprehensive Report | Learnify Admin{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --void: #050505;
+        --glass: rgba(10, 15, 12, 0.45);
+        --green: #00FF41;
+        --cyan: #00FFFF;
+        --purple: #a855f7;
+        --red: #ff3860;
+        --amber: #fbbf24;
+        --text: #e7fff0;
+        --muted: #6f7f78;
+        --line: rgba(0, 255, 65, 0.15);
+        --mono: "Fira Code", "Space Mono", "Consolas", monospace;
+    }
+
+    body {
+        min-height: 100vh;
+        background:
+            radial-gradient(circle at 14% 10%, rgba(0, 255, 65, 0.12), transparent 28%),
+            radial-gradient(circle at 86% 70%, rgba(0, 255, 255, 0.08), transparent 32%),
+            var(--void);
+        color: var(--text);
+        font-family: var(--mono);
+    }
+
+    body::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+            repeating-linear-gradient(90deg, transparent 0 44px, rgba(0, 255, 65, 0.04) 45px, transparent 46px),
+            repeating-linear-gradient(180deg, rgba(0, 255, 65, 0.035) 0 1px, transparent 1px 32px);
+        opacity: 0.45;
+    }
+
+    .report-dashboard {
+        display: grid;
+        gap: 24px;
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 44px clamp(18px, 4vw, 52px) 64px;
+    }
+
+    .report-header,
+    .telemetry-section,
+    .activity-section,
+    .stat-card {
+        background: var(--glass);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+    }
+
+    .report-header,
+    .telemetry-section,
+    .activity-section,
+    .stat-card {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .report-header::before,
+    .telemetry-section::before,
+    .activity-section::before,
+    .stat-card::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.14), transparent) top / 100% 1px no-repeat;
+        pointer-events: none;
+    }
+
+    .report-header {
+        padding: clamp(24px, 4vw, 38px);
+    }
+
+    .eyebrow {
+        margin: 0;
+        color: var(--cyan);
+        font-size: 0.76rem;
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    h1 {
+        margin: 8px 0 12px;
+        color: var(--green);
+        font-family: var(--mono);
+        font-size: clamp(2rem, 6vw, 4.6rem);
+        line-height: 1;
+        text-shadow: 0 0 20px rgba(0, 255, 65, 0.32);
+    }
+
+    .report-header p {
+        max-width: 780px;
+        color: var(--muted);
+        font-family: var(--mono);
+        line-height: 1.7;
+    }
+
+    .report-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 22px;
+    }
+
+    .btn {
+        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 42px;
+        border: 1px solid rgba(0, 255, 65, 0.24);
+        border-radius: 6px;
+        padding: 0 16px;
+        cursor: pointer;
+        font-family: var(--mono);
+        font-weight: 900;
+        text-decoration: none;
+        text-transform: uppercase;
+    }
+
+    .btn-primary {
+        color: #050505;
+        background: var(--green);
+        box-shadow: 0 0 22px rgba(0, 255, 65, 0.24);
+    }
+
+    .btn-secondary {
+        color: var(--cyan);
+        background: rgba(0, 255, 255, 0.055);
+        border-color: rgba(0, 255, 255, 0.25);
+    }
+
+    .btn:hover {
+        animation: glitch 0.42s steps(2, end) infinite;
+        text-shadow: -2px 0 var(--cyan), 2px 0 var(--red);
+    }
+
+    @keyframes glitch {
+        0%, 100% { transform: translate(0); }
+        35% { transform: translate(-1px, 1px); }
+        70% { transform: translate(1px, -1px); }
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    .stat-card {
+        padding: 20px;
+    }
+
+    .stat-card strong {
+        display: block;
+        color: var(--green);
+        font-size: clamp(2rem, 5vw, 3.2rem);
+        line-height: 1;
+        text-shadow: 0 0 18px rgba(0, 255, 65, 0.24);
+    }
+
+    .stat-card span {
+        display: block;
+        margin-top: 10px;
+        color: var(--text);
+        font-weight: 900;
+        text-transform: uppercase;
+    }
+
+    .stat-card small {
+        display: block;
+        margin-top: 5px;
+        color: var(--muted);
+    }
+
+    .telemetry-section,
+    .activity-section {
+        padding: 22px;
+    }
+
+    .section-head {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 18px;
+        padding-bottom: 12px;
+        border-bottom: 1px solid rgba(0, 255, 65, 0.12);
+    }
+
+    .section-head h2,
+    .activity-section h3 {
+        margin: 0;
+        color: var(--green);
+        font-family: var(--mono);
+        font-size: 1rem;
+        text-transform: uppercase;
+    }
+
+    .section-head span {
+        color: var(--cyan);
+        font-size: 0.75rem;
+        font-weight: 900;
+    }
+
+    .table-container {
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        color: var(--text);
+        font-family: var(--mono);
+    }
+
+    .data-table th {
+        padding: 14px 16px;
+        border-bottom: 1px solid rgba(0, 255, 65, 0.14);
+        color: var(--cyan);
+        background: rgba(0, 255, 65, 0.04);
+        font-size: 0.72rem;
+        font-weight: 900;
+        text-align: left;
+        text-transform: uppercase;
+    }
+
+    .data-table td {
+        padding: 15px 16px;
+        border-bottom: 1px solid rgba(0, 255, 65, 0.08);
+        vertical-align: middle;
+        font-size: 0.84rem;
+    }
+
+    .data-table tbody tr:hover {
+        background: rgba(0, 255, 65, 0.035);
+        box-shadow: inset 2px 0 0 var(--green);
+    }
+
+    .muted {
+        color: var(--muted);
+        font-size: 0.75rem;
+    }
+
+    .score-badge {
+        display: inline-flex;
+        min-height: 26px;
+        align-items: center;
+        padding: 0 10px;
+        border-radius: 999px;
+        font-size: 0.72rem;
+        font-weight: 900;
+    }
+
+    .score-badge.high { color: var(--green); border: 1px solid rgba(0, 255, 65, 0.3); background: rgba(0, 255, 65, 0.055); }
+    .score-badge.medium { color: var(--amber); border: 1px solid rgba(251, 191, 36, 0.25); background: rgba(251, 191, 36, 0.055); }
+    .score-badge.low { color: var(--red); border: 1px solid rgba(255, 56, 96, 0.25); background: rgba(255, 56, 96, 0.055); }
+
+    .activity-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 24px;
+    }
+
+    .activity-section {
+        display: grid;
+        gap: 16px;
+    }
+
+    .activity-list {
+        display: grid;
+        gap: 10px;
+    }
+
+    .activity-item {
+        display: grid;
+        grid-template-columns: 0.8fr 1.2fr auto auto;
+        gap: 12px;
+        align-items: center;
+        padding: 12px;
+        border: 1px solid rgba(0, 255, 65, 0.12);
+        border-radius: 6px;
+        background: rgba(0, 0, 0, 0.24);
+        font-size: 0.78rem;
+    }
+
+    .activity-user,
+    .activity-score {
+        color: var(--green);
+        font-weight: 900;
+    }
+
+    .activity-course,
+    .activity-time {
+        color: var(--muted);
+    }
+
+    .empty-state {
+        margin: 0;
+        padding: 18px;
+        color: var(--muted);
+        border: 1px dashed rgba(0, 255, 65, 0.16);
+        border-radius: 6px;
+    }
+
+    @media (max-width: 1080px) {
+        .stats-grid, .activity-grid { grid-template-columns: 1fr 1fr; }
+    }
+
+    @media (max-width: 720px) {
+        .stats-grid, .activity-grid, .activity-item { grid-template-columns: 1fr; }
+        .section-head { flex-direction: column; gap: 8px; align-items: flex-start; }
+    }
+
+    @media (max-width: 480px) {
+        .report-dashboard { padding: 24px clamp(12px, 4vw, 24px) 32px; gap: 16px; }
+        .report-header, .telemetry-section, .activity-section, .stat-card { padding: 16px; }
+        .eyebrow { font-size: 0.65rem !important; }
+        h1 { font-size: clamp(1.5rem, 6vw, 2.5rem) !important; margin: 6px 0 12px; }
+        .report-header p { font-size: 0.9rem !important; line-height: 1.5; }
+        .report-actions { flex-direction: column; gap: 12px; align-items: stretch; }
+        .report-actions .btn { width: 100%; text-align: center; padding: 0.75rem 1rem; }
+        .stats-grid { grid-template-columns: 1fr; gap: 12px; }
+        .stat-card strong { font-size: clamp(1.5rem, 5vw, 2.2rem) !important; }
+        .stat-card span, .stat-card small { font-size: 0.85rem !important; }
+        .section-head h2, .activity-section h3 { font-size: 0.9rem !important; }
+        .section-head span { font-size: 0.7rem !important; }
+        .data-table th, .data-table td { padding: 10px 12px !important; font-size: 0.8rem !important; }
+        .data-table th { font-size: 0.65rem !important; }
+        .activity-list { gap: 8px; }
+        .activity-item { padding: 12px; }
+        .activity-user, .activity-course, .activity-score, .activity-time {
+            display: block; text-align: left; font-size: 0.75rem !important;
         }
+        .empty-state { padding: 12px; font-size: 0.8rem !important; }
+    }
 
-        body {
-            min-height: 100vh;
-            background:
-                radial-gradient(circle at 14% 10%, rgba(0, 255, 65, 0.12), transparent 28%),
-                radial-gradient(circle at 86% 70%, rgba(0, 255, 255, 0.08), transparent 32%),
-                var(--void);
-            color: var(--text);
-            font-family: var(--mono);
-        }
+    @media (max-width: 320px) {
+        .report-dashboard { padding: 16px 8px 24px 8px; }
+        h1 { font-size: 1.3rem !important; }
+        .report-header p { font-size: 0.75rem !important; }
+        .stat-card strong { font-size: 1.3rem !important; }
+        .data-table th, .data-table td { padding: 8px 10px !important; font-size: 0.75rem !important; }
+        .data-table th { font-size: 0.6rem !important; }
+        .activity-item { padding: 10px; }
+        .activity-user, .activity-course, .activity-score, .activity-time { font-size: 0.7rem !important; }
+        .btn { min-height: 36px; padding: 0 12px; font-size: 0.75rem !important; }
+    }
 
-        body::before {
-            content: "";
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            background:
-                repeating-linear-gradient(90deg, transparent 0 44px, rgba(0, 255, 65, 0.04) 45px, transparent 46px),
-                repeating-linear-gradient(180deg, rgba(0, 255, 65, 0.035) 0 1px, transparent 1px 32px);
-            opacity: 0.45;
-        }
+    @media print {
+        body { background: #050505; }
+        .report-actions { display: none; }
+        .report-dashboard { padding: 0; }
+    }
+</style>
+{% endblock %}
 
-        .topbar,
-        main {
-            position: relative;
-            z-index: 1;
-        }
+{% block content %}
+<main>
+    <section class="report-dashboard">
+        <div class="report-header">
+            <p class="eyebrow">LMS_TELEMETRY_DASHBOARD</p>
+            <h1>Comprehensive Report</h1>
+            <p>Live platform telemetry for users, courses, enrollment volume, quiz attempts, and mission performance across the Learnify grid.</p>
+            <div class="report-actions">
+                <button class="btn btn-primary" onclick="window.print()">Print Report</button>
+                <button class="btn btn-secondary" onclick="exportToCSV()">Export CSV</button>
+            </div>
+        </div>
 
-        .report-dashboard {
-            display: grid;
-            gap: 24px;
-            max-width: 1440px;
-            margin: 0 auto;
-            padding: 44px clamp(18px, 4vw, 52px) 64px;
-        }
+        <section class="stats-grid" aria-label="Platform overview">
+            <div class="stat-card">
+                <strong>{{ total_users }}</strong>
+                <span>Total Users</span>
+                <small>{{ verified_users }} verified ({{ verification_rate }}%)</small>
+            </div>
+            <div class="stat-card">
+                <strong>{{ total_courses }}</strong>
+                <span>Total Courses</span>
+                <small>{{ published_courses }} published</small>
+            </div>
+            <div class="stat-card">
+                <strong>{{ total_enrollments }}</strong>
+                <span>Total Enrollments</span>
+                <small>{{ total_enrollments|floatformat:0 }} course enrollments</small>
+            </div>
+            <div class="stat-card">
+                <strong>{{ total_quiz_attempts }}</strong>
+                <span>Quiz Attempts</span>
+                <small>{{ total_sessions }} quiz sessions</small>
+            </div>
+        </section>
 
-        .report-header,
-        .telemetry-section,
-        .activity-section,
-        .stat-card {
-            background: var(--glass);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid var(--line);
-            border-radius: 8px;
-            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.03);
-        }
+        <section class="telemetry-section">
+            <div class="section-head">
+                <h2>Course Performance Analysis</h2>
+                <span>COURSE_MATRIX</span>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Course</th>
+                            <th>Category</th>
+                            <th>Level</th>
+                            <th>Enrollments</th>
+                            <th>Quiz Attempts</th>
+                            <th>Average Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for stat in course_stats %}
+                        <tr>
+                            <td>
+                                <strong>{{ stat.course.title }}</strong><br>
+                                <span class="muted">{{ stat.course.duration }}</span>
+                            </td>
+                            <td>{{ stat.course.category }}</td>
+                            <td>{{ stat.course.level }}</td>
+                            <td>{{ stat.enrollments }}</td>
+                            <td>{{ stat.attempts }}</td>
+                            <td>
+                                <span class="score-badge {% if stat.avg_score >= 80 %}high{% elif stat.avg_score >= 60 %}medium{% else %}low{% endif %}">
+                                    {{ stat.avg_score }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-        .report-header,
-        .telemetry-section,
-        .activity-section,
-        .stat-card {
-            position: relative;
-            overflow: hidden;
-        }
+        <section class="telemetry-section">
+            <div class="section-head">
+                <h2>User Activity Summary</h2>
+                <span>OPERATOR_MATRIX</span>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Enrollments</th>
+                            <th>Quiz Attempts</th>
+                            <th>Average Score</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in user_activity %}
+                        <tr>
+                            <td>
+                                <strong>{{ activity.user.username }}</strong><br>
+                                <span class="muted">{{ activity.user.get_full_name|default:"No name" }}</span>
+                            </td>
+                            <td>{{ activity.user.email }}</td>
+                            <td>{{ activity.enrollments }}</td>
+                            <td>{{ activity.attempts }}</td>
+                            <td>
+                                <span class="score-badge {% if activity.avg_score >= 80 %}high{% elif activity.avg_score >= 60 %}medium{% else %}low{% endif %}">
+                                    {{ activity.avg_score }}%
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
 
-        .report-header::before,
-        .telemetry-section::before,
-        .activity-section::before,
-        .stat-card::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(90deg, transparent, rgba(0, 255, 65, 0.14), transparent) top / 100% 1px no-repeat;
-            pointer-events: none;
-        }
-
-        .report-header {
-            padding: clamp(24px, 4vw, 38px);
-        }
-
-        .eyebrow {
-            margin: 0;
-            color: var(--cyan);
-            font-size: 0.76rem;
-            font-weight: 900;
-            text-transform: uppercase;
-        }
-
-        h1 {
-            margin: 8px 0 12px;
-            color: var(--green);
-            font-family: var(--mono);
-            font-size: clamp(2rem, 6vw, 4.6rem);
-            line-height: 1;
-            text-shadow: 0 0 20px rgba(0, 255, 65, 0.32);
-        }
-
-        .report-header p {
-            max-width: 780px;
-            color: var(--muted);
-            font-family: var(--mono);
-            line-height: 1.7;
-        }
-
-        .report-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            margin-top: 22px;
-        }
-
-        .btn {
-            position: relative;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            min-height: 42px;
-            border: 1px solid rgba(0, 255, 65, 0.24);
-            border-radius: 6px;
-            padding: 0 16px;
-            cursor: pointer;
-            font-family: var(--mono);
-            font-weight: 900;
-            text-decoration: none;
-            text-transform: uppercase;
-        }
-
-        .btn-primary {
-            color: #050505;
-            background: var(--green);
-            box-shadow: 0 0 22px rgba(0, 255, 65, 0.24);
-        }
-
-        .btn-secondary {
-            color: var(--cyan);
-            background: rgba(0, 255, 255, 0.055);
-            border-color: rgba(0, 255, 255, 0.25);
-        }
-
-        .btn:hover {
-            animation: glitch 0.42s steps(2, end) infinite;
-            text-shadow: -2px 0 var(--cyan), 2px 0 var(--red);
-        }
-
-        @keyframes glitch {
-            0%, 100% { transform: translate(0); }
-            35% { transform: translate(-1px, 1px); }
-            70% { transform: translate(1px, -1px); }
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, minmax(0, 1fr));
-            gap: 16px;
-        }
-
-        .stat-card {
-            padding: 20px;
-        }
-
-        .stat-card strong {
-            display: block;
-            color: var(--green);
-            font-size: clamp(2rem, 5vw, 3.2rem);
-            line-height: 1;
-            text-shadow: 0 0 18px rgba(0, 255, 65, 0.24);
-        }
-
-        .stat-card span {
-            display: block;
-            margin-top: 10px;
-            color: var(--text);
-            font-weight: 900;
-            text-transform: uppercase;
-        }
-
-        .stat-card small {
-            display: block;
-            margin-top: 5px;
-            color: var(--muted);
-        }
-
-        .telemetry-section,
-        .activity-section {
-            padding: 22px;
-        }
-
-        .section-head {
-            display: flex;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 18px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid rgba(0, 255, 65, 0.12);
-        }
-
-        .section-head h2,
-        .activity-section h3 {
-            margin: 0;
-            color: var(--green);
-            font-family: var(--mono);
-            font-size: 1rem;
-            text-transform: uppercase;
-        }
-
-        .section-head span {
-            color: var(--cyan);
-            font-size: 0.75rem;
-            font-weight: 900;
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            color: var(--text);
-            font-family: var(--mono);
-        }
-
-        .data-table th {
-            padding: 14px 16px;
-            border-bottom: 1px solid rgba(0, 255, 65, 0.14);
-            color: var(--cyan);
-            background: rgba(0, 255, 65, 0.04);
-            font-size: 0.72rem;
-            font-weight: 900;
-            text-align: left;
-            text-transform: uppercase;
-        }
-
-        .data-table td {
-            padding: 15px 16px;
-            border-bottom: 1px solid rgba(0, 255, 65, 0.08);
-            vertical-align: middle;
-            font-size: 0.84rem;
-        }
-
-        .data-table tbody tr:hover {
-            background: rgba(0, 255, 65, 0.035);
-            box-shadow: inset 2px 0 0 var(--green);
-        }
-
-        .muted {
-            color: var(--muted);
-            font-size: 0.75rem;
-        }
-
-        .score-badge {
-            display: inline-flex;
-            min-height: 26px;
-            align-items: center;
-            padding: 0 10px;
-            border-radius: 999px;
-            font-size: 0.72rem;
-            font-weight: 900;
-        }
-
-        .score-badge.high { color: var(--green); border: 1px solid rgba(0, 255, 65, 0.3); background: rgba(0, 255, 65, 0.055); }
-        .score-badge.medium { color: var(--amber); border: 1px solid rgba(251, 191, 36, 0.25); background: rgba(251, 191, 36, 0.055); }
-        .score-badge.low { color: var(--red); border: 1px solid rgba(255, 56, 96, 0.25); background: rgba(255, 56, 96, 0.055); }
-
-        .activity-grid {
-            display: grid;
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-            gap: 24px;
-        }
-
-        .activity-section {
-            display: grid;
-            gap: 16px;
-        }
-
-        .activity-list {
-            display: grid;
-            gap: 10px;
-        }
-
-        .activity-item {
-            display: grid;
-            grid-template-columns: 0.8fr 1.2fr auto auto;
-            gap: 12px;
-            align-items: center;
-            padding: 12px;
-            border: 1px solid rgba(0, 255, 65, 0.12);
-            border-radius: 6px;
-            background: rgba(0, 0, 0, 0.24);
-            font-size: 0.78rem;
-        }
-
-        .activity-user,
-        .activity-score {
-            color: var(--green);
-            font-weight: 900;
-        }
-
-        .activity-course,
-        .activity-time {
-            color: var(--muted);
-        }
-
-        .empty-state {
-            margin: 0;
-            padding: 18px;
-            color: var(--muted);
-            border: 1px dashed rgba(0, 255, 65, 0.16);
-            border-radius: 6px;
-        }
-
-        @media (max-width: 1080px) {
-            .stats-grid,
-            .activity-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-
-        @media (max-width: 720px) {
-            .stats-grid,
-            .activity-grid,
-            .activity-item {
-                grid-template-columns: 1fr;
-            }
-
-            .section-head {
-                flex-direction: column;
-                gap: 8px;
-                align-items: flex-start;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .report-dashboard {
-                padding: 24px clamp(12px, 4vw, 24px) 32px;
-                gap: 16px;
-            }
-            
-            .report-header,
-            .telemetry-section,
-            .activity-section,
-            .stat-card {
-                padding: 16px;
-            }
-            
-            .eyebrow {
-                font-size: 0.65rem !important;
-            }
-            
-            h1 {
-                font-size: clamp(1.5rem, 6vw, 2.5rem) !important;
-                margin: 6px 0 12px;
-            }
-            
-            .report-header p {
-                font-size: 0.9rem !important;
-                line-height: 1.5;
-            }
-            
-            .report-actions {
-                flex-direction: column;
-                gap: 12px;
-                align-items: stretch;
-            }
-            
-            .report-actions .btn {
-                width: 100%;
-                text-align: center;
-                padding: 0.75rem 1rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            
-            .stat-card strong {
-                font-size: clamp(1.5rem, 5vw, 2.2rem) !important;
-            }
-            
-            .stat-card span,
-            .stat-card small {
-                font-size: 0.85rem !important;
-            }
-            
-            .section-head h2,
-            .activity-section h3 {
-                font-size: 0.9rem !important;
-            }
-            
-            .section-head span {
-                font-size: 0.7rem !important;
-            }
-            
-            .data-table th,
-            .data-table td {
-                padding: 10px 12px !important;
-                font-size: 0.8rem !important;
-            }
-            
-            .data-table th {
-                font-size: 0.65rem !important;
-            }
-            
-            .activity-list {
-                gap: 8px;
-            }
-            
-            .activity-item {
-                grid-template-columns: 1fr;
-                gap: 8px;
-                padding: 12px;
-            }
-            
-            .activity-user,
-            .activity-course,
-            .activity-score,
-            .activity-time {
-                display: block;
-                text-align: left;
-                font-size: 0.75rem !important;
-            }
-            
-            .empty-state {
-                padding: 12px;
-                font-size: 0.8rem !important;
-            }
-            
-            .nav-links a {
-                font-size: 0.8rem !important;
-                margin: 0 4px;
-            }
-            
-            .brand {
-                font-size: 0.9rem !important;
-            }
-            
-            .brand-mark {
-                width: 24px;
-                height: 24px;
-            }
-        }
-
-        @media (max-width: 320px) {
-            .report-dashboard {
-                padding: 16px 8px 24px 8px;
-            }
-            
-            h1 {
-                font-size: 1.3rem !important;
-            }
-            
-            .report-header p {
-                font-size: 0.75rem !important;
-            }
-            
-            .stat-card strong {
-                font-size: 1.3rem !important;
-            }
-            
-            .data-table th,
-            .data-table td {
-                padding: 8px 10px !important;
-                font-size: 0.75rem !important;
-            }
-            
-            .data-table th {
-                font-size: 0.6rem !important;
-            }
-            
-            .activity-item {
-                padding: 10px;
-            }
-            
-            .activity-user,
-            .activity-course,
-            .activity-score,
-            .activity-time {
-                font-size: 0.7rem !important;
-            }
-            
-            .btn {
-                min-height: 36px;
-                padding: 0 12px;
-                font-size: 0.75rem !important;
-            }
-        }
-
-        @media print {
-            body {
-                background: #050505;
-            }
-
-            .report-actions,
-            .topbar {
-                display: none;
-            }
-
-            .report-dashboard {
-                padding: 0;
-            }
-        }
-    </style>
-</head>
-<body>
-    <header class="topbar">
-        <a class="brand" href="{% url 'home' %}" aria-label="Learnify home">
-            <span class="brand-mark">L</span>
-            <span>Learnify</span>
-        </a>
-        <nav class="nav-links" aria-label="Primary">
-            <a href="{% url 'admin_access' %}">Admin Panel</a>
-            <a href="{% url 'admin_user_verification' %}">User Verification</a>
-            <span class="nav-user">{{ user.username }}</span>
-            <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button class="nav-button" type="submit">Logout</button>
-            </form>
-        </nav>
-    </header>
-
-    <main>
-        <section class="report-dashboard">
-            <div class="report-header">
-                <p class="eyebrow">LMS_TELEMETRY_DASHBOARD</p>
-                <h1>Comprehensive Report</h1>
-                <p>Live platform telemetry for users, courses, enrollment volume, quiz attempts, and mission performance across the Learnify grid.</p>
-                <div class="report-actions">
-                    <button class="btn btn-primary" onclick="window.print()">Print Report</button>
-                    <button class="btn btn-secondary" onclick="exportToCSV()">Export CSV</button>
+        <section class="activity-grid">
+            <div class="activity-section">
+                <h3>Recent Enrollments</h3>
+                <div class="activity-list">
+                    {% for enrollment in recent_enrollments %}
+                    <div class="activity-item">
+                        <span class="activity-user">{{ enrollment.user.username }}</span>
+                        <span class="activity-course">{{ enrollment.course.title }}</span>
+                        <span class="activity-time">{{ enrollment.enrolled_at|date:"M d, Y H:i" }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="empty-state">No recent enrollments</p>
+                    {% endfor %}
                 </div>
             </div>
 
-            <section class="stats-grid" aria-label="Platform overview">
-                <div class="stat-card">
-                    <strong>{{ total_users }}</strong>
-                    <span>Total Users</span>
-                    <small>{{ verified_users }} verified ({{ verification_rate }}%)</small>
-                </div>
-                <div class="stat-card">
-                    <strong>{{ total_courses }}</strong>
-                    <span>Total Courses</span>
-                    <small>{{ published_courses }} published</small>
-                </div>
-                <div class="stat-card">
-                    <strong>{{ total_enrollments }}</strong>
-                    <span>Total Enrollments</span>
-                    <small>{{ total_enrollments|floatformat:0 }} course enrollments</small>
-                </div>
-                <div class="stat-card">
-                    <strong>{{ total_quiz_attempts }}</strong>
-                    <span>Quiz Attempts</span>
-                    <small>{{ total_sessions }} quiz sessions</small>
-                </div>
-            </section>
-
-            <section class="telemetry-section">
-                <div class="section-head">
-                    <h2>Course Performance Analysis</h2>
-                    <span>COURSE_MATRIX</span>
-                </div>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>Course</th>
-                                <th>Category</th>
-                                <th>Level</th>
-                                <th>Enrollments</th>
-                                <th>Quiz Attempts</th>
-                                <th>Average Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for stat in course_stats %}
-                            <tr>
-                                <td>
-                                    <strong>{{ stat.course.title }}</strong><br>
-                                    <span class="muted">{{ stat.course.duration }}</span>
-                                </td>
-                                <td>{{ stat.course.category }}</td>
-                                <td>{{ stat.course.level }}</td>
-                                <td>{{ stat.enrollments }}</td>
-                                <td>{{ stat.attempts }}</td>
-                                <td>
-                                    <span class="score-badge {% if stat.avg_score >= 80 %}high{% elif stat.avg_score >= 60 %}medium{% else %}low{% endif %}">
-                                        {{ stat.avg_score }}%
-                                    </span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="telemetry-section">
-                <div class="section-head">
-                    <h2>User Activity Summary</h2>
-                    <span>OPERATOR_MATRIX</span>
-                </div>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Email</th>
-                                <th>Enrollments</th>
-                                <th>Quiz Attempts</th>
-                                <th>Average Score</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for activity in user_activity %}
-                            <tr>
-                                <td>
-                                    <strong>{{ activity.user.username }}</strong><br>
-                                    <span class="muted">{{ activity.user.get_full_name|default:"No name" }}</span>
-                                </td>
-                                <td>{{ activity.user.email }}</td>
-                                <td>{{ activity.enrollments }}</td>
-                                <td>{{ activity.attempts }}</td>
-                                <td>
-                                    <span class="score-badge {% if activity.avg_score >= 80 %}high{% elif activity.avg_score >= 60 %}medium{% else %}low{% endif %}">
-                                        {{ activity.avg_score }}%
-                                    </span>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-
-            <section class="activity-grid">
-                <div class="activity-section">
-                    <h3>Recent Enrollments</h3>
-                    <div class="activity-list">
-                        {% for enrollment in recent_enrollments %}
-                        <div class="activity-item">
-                            <span class="activity-user">{{ enrollment.user.username }}</span>
-                            <span class="activity-course">{{ enrollment.course.title }}</span>
-                            <span class="activity-time">{{ enrollment.enrolled_at|date:"M d, Y H:i" }}</span>
-                        </div>
-                        {% empty %}
-                        <p class="empty-state">No recent enrollments</p>
-                        {% endfor %}
+            <div class="activity-section">
+                <h3>Recent Quiz Attempts</h3>
+                <div class="activity-list">
+                    {% for attempt in recent_attempts %}
+                    <div class="activity-item">
+                        <span class="activity-user">{{ attempt.user.username }}</span>
+                        <span class="activity-course">{{ attempt.course.title }}</span>
+                        <span class="activity-score">{{ attempt.score }}/{{ attempt.total_questions }}</span>
+                        <span class="activity-time">{{ attempt.submitted_at|date:"M d, Y H:i" }}</span>
                     </div>
+                    {% empty %}
+                    <p class="empty-state">No recent quiz attempts</p>
+                    {% endfor %}
                 </div>
-
-                <div class="activity-section">
-                    <h3>Recent Quiz Attempts</h3>
-                    <div class="activity-list">
-                        {% for attempt in recent_attempts %}
-                        <div class="activity-item">
-                            <span class="activity-user">{{ attempt.user.username }}</span>
-                            <span class="activity-course">{{ attempt.course.title }}</span>
-                            <span class="activity-score">{{ attempt.score }}/{{ attempt.total_questions }}</span>
-                            <span class="activity-time">{{ attempt.submitted_at|date:"M d, Y H:i" }}</span>
-                        </div>
-                        {% empty %}
-                        <p class="empty-state">No recent quiz attempts</p>
-                        {% endfor %}
-                    </div>
-                </div>
-            </section>
+            </div>
         </section>
-    </main>
+    </section>
+</main>
 
-    <script>
-        function exportToCSV() {
-            let courseCSV = 'Course,Category,Level,Enrollments,Quiz Attempts,Average Score\n';
-            {% for stat in course_stats %}
-            courseCSV += '{{ stat.course.title|escapejs }},{{ stat.course.category|escapejs }},{{ stat.course.level|escapejs }},{{ stat.enrollments }},{{ stat.attempts }},{{ stat.avg_score }}\n';
-            {% endfor %}
+<script>
+    function exportToCSV() {
+        let courseCSV = 'Course,Category,Level,Enrollments,Quiz Attempts,Average Score\n';
+        {% for stat in course_stats %}
+        courseCSV += '{{ stat.course.title|escapejs }},{{ stat.course.category|escapejs }},{{ stat.course.level|escapejs }},{{ stat.enrollments }},{{ stat.attempts }},{{ stat.avg_score }}\n';
+        {% endfor %}
 
-            let userCSV = 'User,Email,Enrollments,Quiz Attempts,Average Score\n';
-            {% for activity in user_activity %}
-            userCSV += '{{ activity.user.username|escapejs }},{{ activity.user.email|escapejs }},{{ activity.enrollments }},{{ activity.attempts }},{{ activity.avg_score }}\n';
-            {% endfor %}
+        let userCSV = 'User,Email,Enrollments,Quiz Attempts,Average Score\n';
+        {% for activity in user_activity %}
+        userCSV += '{{ activity.user.username|escapejs }},{{ activity.user.email|escapejs }},{{ activity.enrollments }},{{ activity.attempts }},{{ activity.avg_score }}\n';
+        {% endfor %}
 
-            downloadCSV(courseCSV, 'course_performance.csv');
-            setTimeout(() => downloadCSV(userCSV, 'user_activity.csv'), 500);
-        }
+        downloadCSV(courseCSV, 'course_performance.csv');
+        setTimeout(() => downloadCSV(userCSV, 'user_activity.csv'), 500);
+    }
 
-        function downloadCSV(csv, filename) {
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            window.URL.revokeObjectURL(url);
-        }
-    </script>
-</body>
-</html>
+    function downloadCSV(csv, filename) {
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url);
+    }
+</script>
+{% endblock %}

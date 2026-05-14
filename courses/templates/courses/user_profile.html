@@ -461,20 +461,19 @@
             <span class="brand-mark">L</span>
             <span>Learnify</span>
         </a>
-        <nav class="nav-links" aria-label="Primary">
-            <a href="{% url 'home' %}#courses">Courses</a>
-            <a href="{% url 'dashboard' %}">Dashboard</a>
-            <a href="{% url 'performance_report' %}">Reports</a>
-            {% if user.is_staff %}
-                <a href="{% url 'admin_user_verification' %}">User Verification</a>
-            {% endif %}
-            <a href="{% url 'admin_access' %}">Admin</a>
-            <span class="nav-user">{{ user.username }}</span>
-            <form method="post" action="{% url 'logout' %}">
-                {% csrf_token %}
-                <button class="nav-button" type="submit">Logout</button>
-            </form>
-        </nav>
+<nav class="nav-links" aria-label="Primary">
+             <a href="{% url 'home' %}#courses">Courses</a>
+             <a href="{% url 'dashboard' %}">Dashboard</a>
+             <a href="{% url 'user_profile' %}">Profile</a>
+             {% if user.is_staff or user.is_superuser %}
+                 <a href="{% url 'instructor_dashboard' %}">⚙️ Instructor Panel</a>
+             {% endif %}
+             <span class="nav-user">{{ user.username }}</span>
+             <form method="post" action="{% url 'logout' %}">
+                 {% csrf_token %}
+                 <button class="nav-button" type="submit">Logout</button>
+             </form>
+         </nav>
     </header>
 
     {% if messages %}
